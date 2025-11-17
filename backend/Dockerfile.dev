@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+ARG BACKEND_PORT
+ENV BACKEND_PORT=${BACKEND_PORT}
+
+# Expose dynamic port
+EXPOSE ${BACKEND_PORT}
+
+CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:${BACKEND_PORT}"]
