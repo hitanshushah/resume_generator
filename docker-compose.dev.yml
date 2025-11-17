@@ -32,3 +32,19 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+
+  ollama:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
+      args:
+        OLLAMA_MODEL: ${OLLAMA_MODEL}
+        OLLAMA_PORT: ${OLLAMA_PORT}
+    volumes:
+      - ./ollama-models:/root/.ollama
+    env_file:
+      - .env
+    ports:
+      - "${OLLAMA_PORT}:${OLLAMA_PORT}"
+    mem_limit: 8g
+    restart: unless-stopped
