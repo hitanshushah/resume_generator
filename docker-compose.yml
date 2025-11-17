@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_PORT: ${BACKEND_PORT} 
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend-next
+      dockerfile: Dockerfile
+      args:
+        NEXT_PORT: ${NEXT_PORT} 
+    env_file:
+      - .env
+    ports:
+      - "${NEXT_PORT}:${NEXT_PORT}"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
