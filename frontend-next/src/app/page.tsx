@@ -1,103 +1,58 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useUser } from "@/contexts/UserContext";
+import { Progress } from "@/components/ui/progress";
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
+interface SectionData {
+  title: string;
+  content: string;
 }
 
 export default function Home() {
+  const { user } = useUser();
+  const [prompt, setPrompt] = useState("Refactor my resume based on the pasted job description");
+  const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
-  const [usersError, setUsersError] = useState<string | null>(null);
-  const [chatMessage, setChatMessage] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
-  const [chatResponse, setChatResponse] = useState<string | null>(null);
-  const [chatError, setChatError] = useState<string | null>(null);
+  const [sections, setSections] = useState<Record<string, SectionData>>({});
+  const [progress, setProgress] = useState({ current: 0, total: 0, message: "" });
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const testBackend = async () => {
-    setLoading(true);
-    setResult(null);
-    setError(null);
-
-    try {
-      const response = await fetch(`${API_URL}/api/test/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setResult(data.success === true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setResult(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUsers = async () => {
-    setUsersLoading(true);
-    setUsers([]);
-    setUsersError(null);
-
-    try {
-      const response = await fetch('/api/users', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setUsers(data.users || []);
-    } catch (err) {
-      setUsersError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setUsersLoading(false);
-    }
-  };
-
-  const sendChatMessage = async () => {
-    if (!chatMessage.trim()) {
+  const generateResume = async () => {
+    if (!prompt.trim() || !jobDescription.trim()) {
+      setError("Please fill in both prompt and job description");
       return;
     }
 
-    setChatLoading(true);
-    setChatResponse(null);
-    setChatError(null);
+    if (!user?.id) {
+      setError("User not authenticated");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSections({});
+    setProgress({ current: 0, total: 0, message: "Starting..." });
+
+    // Create abort controller for cancellation
+    abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/generate-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: chatMessage }),
+        body: JSON.stringify({
+          prompt,
+          job_description: jobDescription,
+          user_id: user.id,
+        }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -105,208 +60,186 @@ export default function Home() {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      setChatResponse(data.response || 'No response received');
-      setChatMessage("");
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error("No response body");
+      }
+
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === "progress") {
+                setProgress({
+                  current: data.current || 0,
+                  total: data.total || 0,
+                  message: data.message || "",
+                });
+              } else if (data.type === "section") {
+                setSections((prev) => ({
+                  ...prev,
+                  [data.section]: {
+                    title: data.title,
+                    content: data.content,
+                  },
+                }));
+                setProgress({
+                  current: data.progress?.current || 0,
+                  total: data.progress?.total || 0,
+                  message: `Completed: ${data.title}`,
+                });
+              } else if (data.type === "section_error") {
+                setError(`Error in ${data.title}: ${data.error}`);
+                // Continue processing other sections
+              } else if (data.type === "complete") {
+                setProgress({
+                  current: data.total,
+                  total: data.total,
+                  message: "Resume generation completed!",
+                });
+              } else if (data.type === "error") {
+                throw new Error(data.error);
+              }
+            } catch (parseError) {
+              console.error("Error parsing SSE data:", parseError);
+            }
+          }
+        }
+      }
     } catch (err) {
-      setChatError(err instanceof Error ? err.message : "An error occurred");
+      if (err instanceof Error && err.name === "AbortError") {
+        setError("Generation cancelled");
+      } else {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      }
     } finally {
-      setChatLoading(false);
+      setLoading(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const cancelGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black p-8">
-      <main className="w-full max-w-4xl space-y-6">
-        {/* Backend Connection Test Card */}
-        <Card className="dark:bg-zinc-900">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Image
-                className="dark:invert"
-                src="/next.svg"
-                alt="Next.js Logo"
-                width={40}
-                height={40}
-              />
-              Backend Connection Test
-            </CardTitle>
-          </CardHeader>
+    <div className="flex min-h-screen justify-center bg-white font-sans dark:bg-[#212121] p-8">
+      <main className="w-full max-w-4xl">
+        <Card className="dark:bg-[#212121] bg-white border-0 shadow-none">
 
           <CardContent className="space-y-6">
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Click the button below to test the connection to the Django backend.
-            </p>
-
-            {/* Test Button */}
-            <Button 
-              onClick={testBackend} 
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? "Testing..." : "Test Backend Connection"}
-            </Button>
-
-            {/* Result Display */}
-            {result !== null && (
-              <div className="p-4 rounded-lg border">
-                {result ? (
-                  <div className="text-green-600 dark:text-green-400 font-medium">
-                    ✓ Backend responded successfully! Response: true
-                  </div>
-                ) : (
-                  <div className="text-red-600 dark:text-red-400 font-medium">
-                    ✗ Backend connection failed
-                  </div>
-                )}
-                {error && (
-                  <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-                    Error: {error}
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Show Users Card */}
-        <Card className="dark:bg-zinc-900">
-          <CardHeader>
-            <CardTitle>Users Management</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Click the button below to fetch and display all users from the database.
-            </p>
-
-            {/* Show Users Button */}
-            <Button 
-              onClick={fetchUsers} 
-              disabled={usersLoading}
-              className="w-full"
-              variant="outline"
-            >
-              {usersLoading ? "Loading Users..." : "Show Users"}
-            </Button>
-
-            {/* Users Error Display */}
-            {usersError && (
-              <div className="p-4 rounded-lg border border-red-500">
-                <div className="text-red-600 dark:text-red-400 font-medium">
-                  ✗ Error fetching users
-                </div>
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-                  {usersError}
-                </div>
-              </div>
-            )}
-
-            {/* Users Table Display */}
-            {users.length > 0 && (
-              <div className="rounded-lg border dark:text-white">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold text-lg">
-                    Users ({users.length})
-                  </h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="dark:text-white">ID</TableHead>
-                        <TableHead className="dark:text-white">Username</TableHead>
-                        <TableHead className="dark:text-white">Email</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell>{user.id}</TableCell>
-                          <TableCell className="font-medium">{user.username}</TableCell>
-                          <TableCell>{user.email || '-'}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {!usersLoading && users.length === 0 && !usersError && (
-              <div className="p-4 rounded-lg border border-dashed text-center text-zinc-500 dark:text-zinc-400">
-                No users loaded. Click "Show Users" to fetch users from the database.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Chat Interface Card */}
-        <Card className="dark:bg-zinc-900">
-          <CardHeader>
-            <CardTitle>Chat with AI</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Send a message to the AI model powered by Ollama.
-            </p>
-
-            {/* Message Input */}
+            {/* Prompt Input */}
             <div className="space-y-2">
+              <label htmlFor="prompt" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Prompt
+              </label>
               <Textarea
-                placeholder="Type your message here..."
-                value={chatMessage}
-                onChange={(e) => setChatMessage(e.target.value)}
-                disabled={chatLoading}
-                className="min-h-24 resize-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendChatMessage();
-                  }
-                }}
+                id="prompt"
+                placeholder="Enter your prompt here..."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                disabled={loading}
+                className="min-h-10 bg-[#F9F9F9] dark:bg-[#303030] dark:text-white dark:border-0 mt-2"
+              />
+              <p className="text-muted-foreground text-sm">
+                Enter instructions or details for resume generation.
+              </p>
+            </div>
+
+            {/* Job Description Input */}
+            <div className="space-y-2">
+              <label htmlFor="job-description" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Job Description
+              </label>
+              <Textarea
+                id="job-description"
+                placeholder="Enter job description here..."
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                disabled={loading}
+                className="min-h-64 resize-none bg-[#F9F9F9] dark:bg-[#303030] dark:text-white dark:border-0 mt-2"
               />
             </div>
 
-            {/* Send Button */}
-            <Button 
-              onClick={sendChatMessage} 
-              disabled={chatLoading || !chatMessage.trim()}
-              className="w-full"
-            >
-              {chatLoading ? "Sending..." : "Send Message"}
-            </Button>
+            {/* Generate Button */}
+            <div className="flex gap-2">
+              <Button 
+                onClick={generateResume} 
+                disabled={loading || !prompt.trim() || !jobDescription.trim()}
+                className="flex-1 dark:bg-secondary dark:text-secondary-foreground hover:dark:text-white"
+              >
+                {loading ? "Generating..." : "Generate Resume"}
+              </Button>
+              {loading && (
+                <Button 
+                  onClick={cancelGeneration}
+                  variant="outline"
+                  className="dark:bg-[#303030] dark:text-white"
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
 
-            {/* Chat Error Display */}
-            {chatError && (
+            {/* Progress Bar */}
+            {loading && progress.total > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-zinc-600 dark:text-zinc-400">
+                  <span>{progress.message}</span>
+                  <span>{progress.current} / {progress.total}</span>
+                </div>
+                <Progress 
+                  value={(progress.current / progress.total) * 100} 
+                  className="h-2"
+                />
+              </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
               <div className="p-4 rounded-lg border border-red-500">
                 <div className="text-red-600 dark:text-red-400 font-medium">
-                  ✗ Error sending message
+                  ✗ Error
                 </div>
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-                  {chatError}
+                  Failed to generate resume please try again.
                 </div>
               </div>
             )}
 
-            {/* Chat Response Display */}
-            {chatResponse && (
-              <div className="p-4 rounded-lg border dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800">
-                <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  AI Response:
-                </div>
-                <div className="text-zinc-900 dark:text-zinc-100 whitespace-pre-wrap">
-                  {chatResponse}
-                </div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {!chatLoading && !chatResponse && !chatError && (
-              <div className="p-4 rounded-lg border border-dashed text-center text-zinc-500 dark:text-zinc-400">
-                Enter a message and click "Send Message" to chat with the AI.
+            {/* Sections Display */}
+            {Object.keys(sections).length > 0 && (
+              <div className="mt-6 space-y-4">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Generated Resume Sections
+                </label>
+                {Object.entries(sections).map(([sectionKey, sectionData]) => (
+                  <div key={sectionKey} className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-[#F9F9F9] dark:bg-[#303030]">
+                    <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-2">
+                      {sectionData.title}
+                    </h3>
+                    <div className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+                      {sectionData.content}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>

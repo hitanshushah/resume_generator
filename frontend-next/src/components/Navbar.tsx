@@ -45,23 +45,26 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-8 w-full ">
+    <nav className="sticky py-2 top-0 z-50 w-full border-b bg-[#F9F9F9] dark:bg-[#181818] border-b-slate-700 dark:border-b-slate-200">
+      <div className="flex h-16 items-center px-12 w-full ">
         {/* Logo */}
           <Image src="/logo.png" alt="Logo" width={80} height={80} onClick={() => router.push("/")} className="cursor-pointer"/>
 
         {/* Desktop Navigation - Centered */}
         {!isMobile && (
-          <div className="flex flex-1 items-center justify-center gap-4">
+          <div className="flex flex-1 items-center justify-center gap-8">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Button
                   key={item.href}
-                  variant={isActive ? "default" : "outline"}
+                  variant={isActive ? "default" : "ghost"}
                   size="sm"
                   onClick={() => router.push(item.href)}
-                  className="flex items-center gap-2"
+                  className={
+                    `flex items-center gap-2 ` +
+                    (isActive ? "dark:bg-secondary dark:text-secondary-foreground" : "dark:bg-primary dark:text-primary-foreground")
+                  }
                 >
                   <item.icon size={16} />
                   {item.label}
@@ -87,14 +90,28 @@ export function Navbar() {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+
+              <DropdownMenuContent
+                align="end"
+                className="
+                  w-56
+                  dark:bg-[#181818] dark:text-white
+                  dark:border dark:border-gray-700
+                "
+              >
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.username}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user.username}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground dark:text-gray-400">
+                      {user.email}
+                    </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+
+                <DropdownMenuSeparator className="dark:bg-gray-700" />
+
                 {/* Mobile Navigation Items */}
                 {isMobile && (
                   <>
@@ -106,7 +123,11 @@ export function Navbar() {
                             variant="ghost"
                             size="sm"
                             onClick={() => router.push(item.href)}
-                            className={`w-full justify-start gap-2 ${isActive ? "bg-accent" : ""}`}
+                            className={`
+                              w-full justify-start gap-2
+                              dark:bg-[#181818] dark:text-white dark:hover:bg-gray-900
+                              ${isActive ? "dark:bg-gray-800 bg-gray-100" : ""}
+                            `}
                           >
                             <item.icon size={16} />
                             {item.label}
@@ -114,12 +135,17 @@ export function Navbar() {
                         </DropdownMenuItem>
                       );
                     })}
-                    <DropdownMenuSeparator />
+
+                    <DropdownMenuSeparator className="dark:bg-gray-700" />
                   </>
                 )}
+
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2"
+                  className="
+                    cursor-pointer flex items-center gap-2
+                   dark:bg-[#181818] dark:text-white
+                  "
                 >
                   <IconLogout size={16} />
                   Logout
@@ -128,6 +154,7 @@ export function Navbar() {
             </DropdownMenu>
           )}
         </div>
+
       </div>
     </nav>
   );
