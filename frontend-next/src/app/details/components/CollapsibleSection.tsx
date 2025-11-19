@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { ChevronDownIcon, Plus } from "lucide-react";
+import { ChevronDownIcon, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CollapsibleSectionProps {
@@ -44,8 +44,8 @@ export function CollapsibleSection({
                   size="sm"
                   className="gap-2"
                 >
-                  <Plus className="h-4 w-4" />
-                  Add
+                  <Pencil className="h-4 w-4" />
+                  Edit
                 </Button>
                 <ChevronDownIcon
                   className={cn(

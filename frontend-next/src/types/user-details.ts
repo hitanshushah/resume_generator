@@ -22,8 +22,6 @@ export interface Project {
   key: string;
   name: string;
   description: string | null;
-  start_date: string | null;
-  end_date: string | null;
   sorting_order: number | null;
   created_at: string | null;
   updated_at: string | null;
@@ -50,7 +48,7 @@ export interface Experience {
   start_date: string | null;
   end_date: string | null;
   description: string | null;
-  skills: string | null;
+  skills: string[] | null;
   location: string | null;
 }
 

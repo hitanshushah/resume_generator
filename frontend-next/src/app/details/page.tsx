@@ -13,6 +13,8 @@ import type {
 } from "@/types/user-details";
 import { CollapsibleSection } from "./components/CollapsibleSection";
 import { EmptyState } from "./components/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 
 export default function DetailsPage() {
   const { user, loading: userLoading } = useUser();
@@ -116,6 +118,15 @@ export default function DetailsPage() {
 
   const { userProfile, projects, certifications, achievements, experiences, publications, skills, education } = data;
 
+  const handleAddClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = process.env.NEXT_PUBLIC_WEBBSTYLE_URL;
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+
   return (
     <div className="container mx-auto p-8 space-y-6">
       {/* Profile Header */}
@@ -142,7 +153,7 @@ export default function DetailsPage() {
                 {userProfile.country && <Badge variant="outline">{userProfile.country}</Badge>}
               </div>
               {userProfile.links && userProfile.links.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex flex-wrap flex-col gap-2 pt-2 w-fit">
                   {userProfile.links.map((link, idx) => (
                     <a
                       key={idx}
@@ -151,15 +162,25 @@ export default function DetailsPage() {
                       rel="noopener noreferrer"
                       className="text-sm text-primary hover:underline"
                     >
-                      {link.title}
+                      {link.title} -{link.url}
                     </a>
                   ))}
                 </div>
               )}
-              <div className="flex flex-wrap pt-2">
+              <div className="flex flex-wrap pt-2 gap-4">
                 {userProfile.email && <Badge variant="outline">{userProfile.email}</Badge>}
+                {userProfile.phone_number && <Badge variant="outline">{userProfile.phone_number}</Badge>}
               </div>
-            </div>  
+            </div> 
+            <Button
+                  onClick={handleAddClick}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button> 
           </div>
         </CardHeader>
         {userProfile.introduction && (
@@ -190,9 +211,6 @@ export default function DetailsPage() {
                         </CardDescription>
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(project.start_date)} - {formatDate(project.end_date)}
-                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -205,7 +223,7 @@ export default function DetailsPage() {
                     </div>
                   )}
                   {project.links && project.links.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col flex-wrap gap-2 w-fit">
                       {project.links.map((link, idx) => (
                         <a
                           key={idx}
@@ -214,7 +232,7 @@ export default function DetailsPage() {
                           rel="noopener noreferrer"
                           className="text-sm text-primary hover:underline"
                         >
-                          {link.title}
+                          {link.title} - {link.url}
                         </a>
                       ))}
                     </div>
@@ -254,10 +272,11 @@ export default function DetailsPage() {
                   {exp.description && (
                     <p className="text-muted-foreground whitespace-pre-wrap">{exp.description}</p>
                   )}
-                  {exp.skills && (
-                    <div>
-                      <p className="text-sm font-medium mb-1">Skills:</p>
-                      <p className="text-sm text-muted-foreground">{exp.skills}</p>
+                 {exp.skills && exp.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {exp.skills.map((skill, idx) => (
+                        <Badge key={idx} variant="secondary">{skill}</Badge>
+                      ))}
                     </div>
                   )}
                 </CardContent>
@@ -285,7 +304,7 @@ export default function DetailsPage() {
                       <CardTitle>{edu.degree}</CardTitle>
                       <CardDescription className="mt-1">{edu.university_name}</CardDescription>
                       {edu.location && <CardDescription>{edu.location}</CardDescription>}
-                      {edu.cgpa && <CardDescription>CGPA: {edu.cgpa}</CardDescription>}
+                      {edu.cgpa && <CardDescription>Grade: {edu.cgpa}</CardDescription>}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {formatDate(edu.from_date)} - {formatDate(edu.end_date)}
@@ -429,7 +448,7 @@ export default function DetailsPage() {
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline"
                   >
-                    View Paper
+                    Paper Link - {pub.paper_link}
                   </a>
                 )}
                 <Separator />

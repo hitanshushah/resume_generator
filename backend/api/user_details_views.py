@@ -95,8 +95,6 @@ def get_user_details(request, user_id):
                                 'key', pr.key,
                                 'name', pr.name,
                                 'description', pr.description,
-                                'start_date', pr.start_date,
-                                'end_date', pr.end_date,
                                 'sorting_order', pr.sorting_order,
                                 'created_at', pr.created_at,
                                 'updated_at', pr.updated_at,
