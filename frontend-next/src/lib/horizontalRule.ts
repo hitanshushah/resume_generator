@@ -38,7 +38,7 @@ export const CustomHorizontalRule = Node.create<HorizontalRuleOptions>({
     const spacingBefore = attrs.spacingBefore || null;
     const spacingAfter = attrs.spacingAfter || null;
     
-    // Build margin styles
+    
     const marginTop = spacingBefore || "1.5rem";
     const marginBottom = spacingAfter || "1.5rem";
     
@@ -159,12 +159,12 @@ export const CustomHorizontalRule = Node.create<HorizontalRuleOptions>({
           const { selection } = state;
           const { $from } = selection;
           
-          // Check if already on a horizontal rule
+          
           if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
             return true;
           }
           
-          // Check previous node
+          
           if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
             const pos = $from.pos - $from.nodeBefore.nodeSize;
             if (dispatch) {
@@ -174,7 +174,7 @@ export const CustomHorizontalRule = Node.create<HorizontalRuleOptions>({
             return true;
           }
           
-          // Check next node
+          
           if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
             const pos = $from.pos;
             if (dispatch) {
@@ -184,7 +184,7 @@ export const CustomHorizontalRule = Node.create<HorizontalRuleOptions>({
             return true;
           }
           
-          // Search for nearest horizontal rule in document
+          
           let nearestPos = -1;
           let minDistance = Infinity;
           
@@ -212,11 +212,11 @@ export const CustomHorizontalRule = Node.create<HorizontalRuleOptions>({
           const { selection } = state;
           let hrPos = null;
           
-          // If a horizontal rule is selected
+          
           if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
             hrPos = selection.$anchor.pos;
           } else {
-            // Try to find nearest horizontal rule
+            
             const { $from } = selection;
             
             if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
@@ -224,7 +224,7 @@ export const CustomHorizontalRule = Node.create<HorizontalRuleOptions>({
             } else if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
               hrPos = $from.pos;
             } else {
-              // Search for nearest horizontal rule
+              
               let nearestPos = -1;
               let minDistance = Infinity;
               

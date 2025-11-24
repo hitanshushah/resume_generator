@@ -62,7 +62,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
   const [, forceUpdate] = useState({});
   const isInternalUpdateRef = useRef(false);
 
-  // Handle client-side mounting to avoid SSR issues
+  
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -73,7 +73,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
         heading: {
           levels: [1, 2, 3],
         },
-        horizontalRule: false, // Disable default horizontal rule to use custom one
+        horizontalRule: false, 
       }),
       TextStyle,
       FontSize,
@@ -94,16 +94,16 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      // Mark this as an internal update to prevent cursor jumping
+      
       isInternalUpdateRef.current = true;
       onContentChange?.(html);
-      // Reset the flag after a short delay
+      
       setTimeout(() => {
         isInternalUpdateRef.current = false;
       }, 0);
     },
     onSelectionUpdate: () => {
-      // Force re-render to update dropdown values when selection changes
+      
       forceUpdate({});
     },
     editorProps: {
@@ -111,8 +111,8 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
         class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[500px] p-4 dark:prose-invert max-w-5xl",
       },
       handleScrollToSelection: (view) => {
-        // Allow normal scroll behavior - TipTap will handle scrolling to selection
-        // We don't need to prevent it, just let it work naturally
+        
+        
         return true;
       },
     },
@@ -121,21 +121,21 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
 
 
 
-  // Update editor content when prop changes (only on client)
+  
   useEffect(() => {
     if (editor && content !== originalContent && isMounted) {
-      // Skip update if this change came from the editor itself (user typing)
+      
       if (isInternalUpdateRef.current) {
         setOriginalContent(content);
         return;
       }
       
-      // Get current editor content
+      
       const currentContent = editor.getHTML();
       
-      // Only update if the content is actually different (external change)
+      
       if (currentContent !== content) {
-        // Store current cursor position and scroll position
+        
         const { from, to } = editor.state.selection;
         const scrollContainer = document.querySelector('.ProseMirror')?.parentElement;
         const scrollTop = scrollContainer?.scrollTop || 0;
@@ -143,10 +143,10 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
         setOriginalContent(content);
         editor.commands.setContent(content);
         
-        // Restore cursor position and scroll position after content update
+        
         setTimeout(() => {
           try {
-            // Try to restore cursor position if possible
+            
             const docSize = editor.state.doc.content.size;
             const safeFrom = Math.min(from, docSize);
             const safeTo = Math.min(to, docSize);
@@ -154,7 +154,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
               editor.commands.setTextSelection({ from: safeFrom, to: safeTo });
             }
           } catch (e) {
-            // If cursor position restoration fails, just focus at the end
+            
             editor.commands.focus('end');
           }
           
@@ -163,13 +163,13 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
           }
         }, 0);
       } else {
-        // Content matches, just update the originalContent to prevent re-triggering
+        
         setOriginalContent(content);
       }
     }
   }, [content, editor, originalContent, isMounted]);
 
-  // Show loading state during SSR
+  
   if (!isMounted || !editor) {
     return (
       <div className="w-full border rounded-lg overflow-hidden bg-white dark:bg-[#212121] min-h-[500px] flex items-center justify-center">
@@ -178,7 +178,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
     );
   }
 
-  // Helper function to create full HTML document with styles (same as download HTML)
+  
   const createFullHTML = (html: string) => {
     const css = `
       <style>
@@ -224,7 +224,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
     const html = editor.getHTML();
     const fullHtml = createFullHTML(html);
     
-    // Create a new window with the HTML content
+    
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       alert("Please allow popups to print your resume.");
@@ -234,13 +234,13 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
     printWindow.document.write(fullHtml);
     printWindow.document.close();
     
-    // Wait for content to load, then trigger print
-    // Use both onload and a timeout to ensure content is ready
+    
+    
     const triggerPrint = () => {
       setTimeout(() => {
         printWindow.print();
-        // Close the window after printing (optional - user can cancel)
-        // printWindow.close();
+        
+        
       }, 250);
     };
     
@@ -813,7 +813,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
                   if (paragraph.type.name === "paragraph" && paragraph.attrs.spacingAfter) {
                     return paragraph.attrs.spacingAfter;
                   }
-                  // Fallback to old spacing attribute for backward compatibility
+                  
                   if (paragraph.type.name === "paragraph" && paragraph.attrs.spacing) {
                     return paragraph.attrs.spacing;
                   }

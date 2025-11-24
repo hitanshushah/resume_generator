@@ -20,7 +20,7 @@ export function CollapsibleSection({
   children,
 }: CollapsibleSectionProps) {
   const handleAddClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the collapsible toggle
+    e.stopPropagation(); 
     const url = process.env.NEXT_PUBLIC_WEBBSTYLE_URL;
     if (url) {
       window.open(url, "_blank", "noopener,noreferrer");

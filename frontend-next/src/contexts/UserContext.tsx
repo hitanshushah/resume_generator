@@ -26,7 +26,7 @@ export function UserProvider({ children }: UserProviderProps) {
   const [error, setError] = useState<string | null>(null);
   const hasInitialized = useRef<boolean>(false);
 
-  // Sync user state with store
+  
   useEffect(() => {
     setUser(storeUser);
     if (storeUser) {

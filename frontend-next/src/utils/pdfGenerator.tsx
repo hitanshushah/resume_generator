@@ -1,10 +1,10 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Link as PDFLink, pdf } from "@react-pdf/renderer";
 
-// A4 size in points (1 inch = 72 points)
+
 const A4_WIDTH = 595.28;
 const A4_HEIGHT = 841.89;
-const DEFAULT_MARGIN = 36; // 1 inch margins
+const DEFAULT_MARGIN = 36; 
 
 function createStyles(margin: number) {
   return StyleSheet.create({
@@ -66,7 +66,7 @@ function createStyles(margin: number) {
   });
 }
 
-// Helper function to parse HTML and convert to react-pdf components
+
 function parseHTMLToPDF(html: string, styles: any): React.ReactElement[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
@@ -91,7 +91,7 @@ function parseHTMLToPDF(html: string, styles: any): React.ReactElement[] {
     const tagName = element.tagName.toLowerCase();
     const children: React.ReactElement[] = [];
     
-    // Process child nodes
+    
     Array.from(element.childNodes).forEach((child, index) => {
       const childElement = processNode(child, index);
       if (childElement) {
@@ -99,11 +99,11 @@ function parseHTMLToPDF(html: string, styles: any): React.ReactElement[] {
       }
     });
     
-    // Get inline styles
+    
     const inlineStyle = element.getAttribute("style") || "";
     const styleObj: any = {};
     
-    // Parse inline styles
+    
     if (inlineStyle) {
       inlineStyle.split(";").forEach((style) => {
         const [prop, value] = style.split(":").map((s) => s.trim());
@@ -127,8 +127,8 @@ function parseHTMLToPDF(html: string, styles: any): React.ReactElement[] {
       });
     }
     
-    // Remove top margin from first element to avoid extra space at the top of first page
-    // Apply firstElementStyle last to ensure it overrides both tag styles and inline styles
+    
+    
     const firstElementStyle = isFirstElement && (tagName === "h1" || tagName === "h2" || tagName === "h3" || tagName === "p" || tagName === "ul" || tagName === "ol") 
       ? { marginTop: 0 } 
       : {};
@@ -214,7 +214,7 @@ function parseHTMLToPDF(html: string, styles: any): React.ReactElement[] {
       case "br":
         return <Text key={key}>{"\n"}</Text>;
       default:
-        // For other tags, just render children
+        
         if (children.length > 0) {
           return (
             <View key={key} style={styleObj} wrap={true} break={false}>
@@ -226,7 +226,7 @@ function parseHTMLToPDF(html: string, styles: any): React.ReactElement[] {
     }
   }
   
-  // Process all top-level nodes in body
+  
   let isFirstElement = true;
   Array.from(body.childNodes).forEach((node, index) => {
     const element = processNode(node, index, isFirstElement);

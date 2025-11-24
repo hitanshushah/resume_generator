@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Stream the response from backend to frontend
+    
     const stream = new ReadableStream({
       async start(controller) {
         const reader = backendResponse.body?.getReader();

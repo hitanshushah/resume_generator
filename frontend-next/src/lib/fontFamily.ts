@@ -19,7 +19,7 @@ export const FontFamily = Extension.create({
             parseHTML: (element) => {
               const fontFamily = element.style.fontFamily;
               if (!fontFamily) return null;
-              // Remove quotes if present
+              
               return fontFamily.replace(/['"]/g, "");
             },
             renderHTML: (attributes) => {

@@ -32,7 +32,7 @@ export default function DetailsPage() {
   });
 
   useEffect(() => {
-    // Wait for user context to finish loading
+    
     if (userLoading) {
       return;
     }
@@ -327,7 +327,7 @@ export default function DetailsPage() {
       >
         {skills && skills.length > 0 ? (
           (() => {
-            // Group skills by category
+            
             const groupedSkills = skills.reduce((acc, skill) => {
               const categoryName = skill.category?.name || "Uncategorized";
               if (!acc[categoryName]) {

@@ -31,7 +31,7 @@ export const ParagraphSpacing = Extension.create({
             default: null,
             parseHTML: (element) => element.getAttribute("data-spacing") || null,
             renderHTML: (attributes) => {
-              // Only apply old spacing if spacingAfter is not set (for backward compatibility)
+              
               if (!attributes.spacing || attributes.spacingAfter) {
                 return attributes.spacing ? { "data-spacing": attributes.spacing } : {};
               }
@@ -88,7 +88,7 @@ export const ParagraphSpacing = Extension.create({
           const { selection } = state;
           const { $from } = selection;
           
-          // Get the current paragraph node
+          
           const paragraph = $from.parent;
           if (paragraph.type.name === "paragraph") {
             const pos = $from.before($from.depth);
@@ -114,7 +114,7 @@ export const ParagraphSpacing = Extension.create({
           const { selection } = state;
           const { $from } = selection;
           
-          // Get the current paragraph node
+          
           const paragraph = $from.parent;
           if (paragraph.type.name === "paragraph") {
             const pos = $from.before($from.depth);
@@ -140,7 +140,7 @@ export const ParagraphSpacing = Extension.create({
           const { selection } = state;
           const { $from } = selection;
           
-          // Get the current paragraph node
+          
           const paragraph = $from.parent;
           if (paragraph.type.name === "paragraph") {
             const pos = $from.before($from.depth);

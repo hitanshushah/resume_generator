@@ -36,7 +36,7 @@ export const LineHeight = Extension.create({
           const { selection } = state;
           const { $from } = selection;
           
-          // Get the current node (paragraph or heading)
+          
           const node = $from.parent;
           if (node.type.name === "paragraph" || node.type.name === "heading") {
             tr.setNodeMarkup($from.before($from.depth), null, {
