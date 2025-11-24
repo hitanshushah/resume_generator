@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from . import user_details_views
 from . import resume_views
+from . import template_views
 
 app_name = 'api'
 
@@ -13,5 +14,6 @@ urlpatterns = [
     path('chat/', views.chat, name='chat'),
     path('generate-resume/', resume_views.generate_resume, name='generate_resume'),
     path('users/<int:user_id>/details/', user_details_views.get_user_details, name='get_user_details'),
+    path('save-template/', template_views.save_template, name='save_template'),
 ]
 

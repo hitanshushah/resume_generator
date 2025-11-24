@@ -36,6 +36,7 @@ def get_user_details_data(user_id_int):
                     p.override_email,
                     p.website_url,
                     p.personal_website_url,
+                    p.resume_template,
                     -- Projects Board URL (only if share_profile is true)
                     CASE 
                         WHEN p.share_profile = TRUE AND p.public_url IS NOT NULL THEN p.public_url 
