@@ -284,71 +284,77 @@ def prepare_resume_sections(user_details, prompt, job_description):
     """
     Prepare user details into sections for sequential processing.
     Returns a list of sections with their prompts.
+    Now only generates 3 sections: summary, experiences, and projects.
     """
     sections = []
     
-    # Section 1: Profile/Header
-    profile_data = {
-        'userProfile': user_details.get('userProfile', {})
-    }
+    # Section 1: Summary (from bio and introduction)
+    profile_data = user_details.get('userProfile', {})
+    bio = profile_data.get('bio', '')
+    introduction = profile_data.get('introduction', '')
+    
     sections.append({
-        'section': 'profile',
-        'title': 'Profile & Contact Information',
-        'data': profile_data,
-        'prompt': f"""IMPORTANT: Use ONLY the user's actual data provided below. Do NOT create or invent any information.
+        'section': 'summary',
+        'title': 'Professional Summary',
+        'data': {
+            'bio': bio,
+            'introduction': introduction,
+            'job_description': job_description
+        },
+        'prompt': f"""IMPORTANT: Use ONLY the user's bio and introduction provided below. Do NOT create or invent any information.
 
 Job Description:
 {job_description}
 
-User Profile Information (USE ONLY THIS DATA):
-{json.dumps(profile_data, indent=2)}
+User's Bio:
+{bio}
 
-Task: Create the header section of the resume using ONLY the user's actual profile information above.
+User's Introduction:
+{introduction}
 
-CONTACT INFORMATION (DO NOT CHANGE - USE EXACTLY AS PROVIDED):
-- Use the EXACT name, designation, address, email, phone number, and links from the user profile
-- Do NOT modify, reword, or change any contact information
-- Include all links exactly as provided in the user data
+Task: Create a professional summary by combining the user's bio and introduction.
 
-PROFESSIONAL SUMMARY (ONLY PART TO MODIFY):
+REQUIREMENTS:
 - Combine the user's bio and introduction into a short professional summary
 - Maximum 3 lines only
 - Reword the combined bio/introduction to align with the job description's requirements and terminology
 - Use keywords and language from the job description while maintaining the user's actual background
 - Keep it concise and impactful (max 3 lines)
-- Do NOT add any information that is not in the provided user data"""
+- Do NOT add any information that is not in the provided bio or introduction
+- Output ONLY the summary text, no headings or extra formatting"""
     })
     
-    # Section 2: Experiences
+    # Section 2: Experiences - Only generate descriptions
     if user_details.get('experiences'):
+        experiences = user_details.get('experiences', [])
         sections.append({
             'section': 'experiences',
             'title': 'Work Experience',
-            'data': {'experiences': user_details.get('experiences', [])},
-            'prompt': f"""IMPORTANT: Use ONLY the user's actual work experiences provided below. Do NOT create or invent any experiences.
+            'data': {'experiences': experiences},
+            'prompt': f"""IMPORTANT: Generate ONLY descriptions for each work experience. Do NOT include company names, job titles, locations, dates, or technologies.
 
 Job Description:
 {job_description}
 
-User's Actual Work Experiences (USE ONLY THESE):
-{json.dumps(user_details.get('experiences', []), indent=2)}
+User's Actual Work Experiences (generate descriptions for each):
+{json.dumps(experiences, indent=2)}
 
-Task: Create the work experience section using ONLY the user's actual experiences above.
-
-PRIMARY FOCUS: Change keywords, technologies, and wordings to match the job description while keeping the same structure and size.
+Task: Generate professional descriptions for each work experience that align with the job description.
 
 REQUIREMENTS:
-- Keep the SAME number of experiences as in the user data (include all experiences)
-- Keep the SAME structure, format, and length for each experience entry
-- Keep the EXACT company names, roles, dates, and locations unchanged
-- ONLY modify: 
-  * Technologies mentioned - replace with job description terminology where applicable
-  * Keywords and wordings in descriptions - align with job description language
-  * Skills mentioned - use job description terminology
-- Maintain the same level of detail and number of bullet points as the original
-- Do NOT add or remove experiences
-- Do NOT change the structure or format
-- Do NOT create, modify, or invent any work experiences"""
+- Generate descriptions for ALL {len(experiences)} experiences in the same order as provided
+- Each description should be formatted as HTML bullet points using <ul><li> tags
+- Use keywords and terminology from the job description
+- Maintain similar level of detail as the original descriptions
+- Do NOT include company names, job titles, locations, dates, or technologies
+- Do NOT create or invent any experiences
+- Output format: Return descriptions separated by a clear delimiter "---EXPERIENCE_SEPARATOR---" between each experience
+- Each description should be in HTML format: <ul><li><p>Description point 1</p></li><li><p>Description point 2</p></li></ul>
+
+Example output format:
+<ul><li><p>First bullet point for experience 1</p></li><li><p>Second bullet point for experience 1</p></li></ul>
+---EXPERIENCE_SEPARATOR---
+<ul><li><p>First bullet point for experience 2</p></li><li><p>Second bullet point for experience 2</p></li></ul>"""
         })
     
     # Section 3: Projects
@@ -381,101 +387,8 @@ REQUIREMENTS:
 - Use what the user data has stored - just change words, tech, and keywords to match job description
 - Do NOT add or remove projects
 - Do NOT change the structure or format
-- DO NOT create, invent, or generate any projects that are not in the user's actual project list above"""
-        })
-    
-    # Section 4: Skills
-    if user_details.get('skills') or user_details.get('technologies'):
-        skills_data = {
-            'skills': user_details.get('skills', []),
-            'technologies': user_details.get('technologies', [])
-        }
-        sections.append({
-            'section': 'skills',
-            'title': 'Skills & Technologies',
-            'data': skills_data,
-            'prompt': f"""IMPORTANT: Keep user's skills the same, but can add important missing skills from job description.
-
-Job Description:
-{job_description}
-
-User's Actual Skills and Technologies (INCLUDE ALL OF THESE):
-{json.dumps(skills_data, indent=2)}
-
-Task: Create the skills section using the user's actual skills and technologies above.
-
-REQUIREMENTS:
-- Include ALL of the user's actual skills and technologies (keep them the same)
-- Prioritize and list first the skills/technologies that match the job description requirements
-- Group skills by category (e.g., Programming Languages, Frameworks, Tools) if applicable
-- Use the exact terminology from the job description for matching skills
-- ONLY if there are important skills/technologies mentioned in the job description that the user doesn't have, you may add them (but only if they are critical/important for the role)
-- Do NOT remove any of the user's existing skills"""
-        })
-    
-    # Section 5: Education
-    if user_details.get('education'):
-        sections.append({
-            'section': 'education',
-            'title': 'Education',
-            'data': {'education': user_details.get('education', [])},
-            'prompt': f"""IMPORTANT: Do NOT change education - keep it exactly the same.
-
-User's Actual Education (USE EXACTLY AS PROVIDED):
-{json.dumps(user_details.get('education', []), indent=2)}
-
-Task: Output the education section EXACTLY as provided in the user data above.
-- Use the EXACT university names, degrees, dates, locations, and CGPA from the user's data
-- Do NOT modify, reword, or change anything
-- Maintain the same format and structure
-- Keep it exactly as provided in the user data"""
-        })
-    
-    # Section 6: Certifications
-    if user_details.get('certifications'):
-        sections.append({
-            'section': 'certifications',
-            'title': 'Certifications',
-            'data': {'certifications': user_details.get('certifications', [])},
-            'prompt': f"""IMPORTANT: Keep certifications the same - do NOT change.
-
-User's Actual Certifications (USE EXACTLY AS PROVIDED):
-{json.dumps(user_details.get('certifications', []), indent=2)}
-
-Task: Output the certifications section EXACTLY as provided in the user data above.
-- Use the EXACT certification names, institute names, dates, and descriptions from the user's data
-- Do NOT modify, reword, or change anything
-- Keep it exactly as provided in the user data"""
-        })
-    
-    # Section 7: Additional (Achievements, Publications)
-    additional_data = {}
-    if user_details.get('achievements'):
-        additional_data['achievements'] = user_details.get('achievements', [])
-    if user_details.get('publications'):
-        additional_data['publications'] = user_details.get('publications', [])
-    
-    if additional_data:
-        sections.append({
-            'section': 'additional',
-            'title': 'Additional Information',
-            'data': additional_data,
-            'prompt': f"""IMPORTANT: Keep publications the same - do NOT change. Achievements can be slightly reworded.
-
-Job Description:
-{job_description}
-
-User's Actual Additional Information (USE THIS DATA):
-{json.dumps(additional_data, indent=2)}
-
-Task: Create the additional information section using the user's actual achievements and publications above.
-
-REQUIREMENTS:
-- PUBLICATIONS: Keep EXACTLY the same - do NOT modify, reword, or change publications
-- ACHIEVEMENTS: Can slightly reword to align with job description keywords, but keep the same achievements
-- Use the exact publication details from the user's data
-- Maintain accuracy - use only the actual achievements and publications the user has
-- Do NOT create, modify, or invent any achievements or publications"""
+- DO NOT create, invent, or generate any projects that are not in the user's actual project list above
+- Format the output as HTML with proper structure for each project entry"""
         })
     
     return sections

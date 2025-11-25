@@ -252,9 +252,9 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
   };
 
   return (
-    <div className="w-full border rounded-lg overflow-hidden bg-white dark:bg-[#212121]">
+    <div className="w-full border rounded-lg overflow-y-auto bg-white dark:bg-[#212121] flex flex-col max-h-[800px]">
       {/* Toolbar */}
-      <div className="border-b p-2 flex flex-wrap items-center gap-2 bg-[#F9F9F9] dark:bg-[#303030]">
+      <div className="sticky top-0 z-10 border-b p-2 flex flex-wrap items-center gap-2 bg-[#F9F9F9] dark:bg-[#303030]">
         {/* Undo/Redo */}
             <div className="flex gap-1 border-r pr-2">
               <Button
@@ -489,214 +489,222 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
               </Popover>
             </div>
 
-            {/* Horizontal Rule */}
+            {/* Horizontal Rule - Insert */}
             <div className="flex gap-1 border-r pr-2 items-center">
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => editor.chain().focus().setHorizontalRule({ width: "100%", color: "#e5e7eb", thickness: "2px" }).run()}
-                  className="h-8"
-                  title="Insert Horizontal Line"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3 text-sm">
-                    <p className="font-medium mb-1">Insert Horizontal Line</p>
-                    <p className="text-zinc-600 dark:text-zinc-400">Click the dash icon to insert a horizontal line in your document.</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    const selected = editor.chain().focus().selectHorizontalRule().run();
-                    if (!selected) {
-                      alert("No horizontal line found nearby. Please click on a line first.");
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().setHorizontalRule({ width: "100%", color: "#e5e7eb", thickness: "2px" }).run()}
+                className="h-8"
+                title="Insert Horizontal Line"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 text-sm">
+                  <p className="font-medium mb-1">Insert Horizontal Line</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Click the dash icon to insert a horizontal line in your document.</p>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Horizontal Rule - Select */}
+            <div className="flex gap-1 border-r pr-2 items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const selected = editor.chain().focus().selectHorizontalRule().run();
+                  if (!selected) {
+                    alert("No horizontal line found nearby. Please click on a line first.");
+                  }
+                }}
+                className="h-8 px-2 text-xs"
+                title="Select Line"
+              >
+                Select
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 text-sm">
+                  <p className="font-medium mb-1">Select Horizontal Line</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Click to select the nearest horizontal line so you can customize its color and thickness.</p>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Horizontal Rule - Color */}
+            <div className="flex gap-1 border-r pr-2 items-center">
+              <input
+                type="color"
+                onChange={(e) => {
+                  const updated = editor.chain().focus().updateHorizontalRule({ color: e.target.value }).run();
+                  if (!updated) {
+                    editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ color: e.target.value }).run();
+                  }
+                }}
+                className="h-8 w-8 cursor-pointer border rounded"
+                title="Line Color"
+              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 text-sm">
+                  <p className="font-medium mb-1">Line Color</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Click to change the color of the selected horizontal line. If no line is selected, it will find and update the nearest one.</p>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Horizontal Rule - Thickness */}
+            <div className="flex gap-1 border-r pr-2 items-center">
+              <select
+                onChange={(e) => {
+                  const updated = editor.chain().focus().updateHorizontalRule({ thickness: e.target.value }).run();
+                  if (!updated) {
+                    editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ thickness: e.target.value }).run();
+                  }
+                }}
+                className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
+                defaultValue="2px"
+                title="Line Thickness"
+              >
+                <option value="1px">Thin</option>
+                <option value="2px">Medium</option>
+                <option value="3px">Thick</option>
+                <option value="4px">Extra Thick</option>
+              </select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 text-sm">
+                  <p className="font-medium mb-1">Line Thickness</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Choose the thickness of the selected horizontal line. Options range from Thin to Extra Thick.</p>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Horizontal Rule - Spacing Before */}
+            <div className="flex gap-1 border-r pr-2 items-center">
+              <select
+                value={(() => {
+                  if (!editor) return "default";
+                  const { state } = editor;
+                  const { selection } = state;
+                  let hrNode = null;
+                  
+                  if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
+                    hrNode = selection.node;
+                  } else {
+                    const { $from } = selection;
+                    if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
+                      hrNode = $from.nodeBefore;
+                    } else if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
+                      hrNode = $from.nodeAfter;
                     }
-                  }}
-                  className="h-8 px-2 text-xs"
-                  title="Select Line"
-                >
-                  Select
-                </Button>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3 text-sm">
-                    <p className="font-medium mb-1">Select Horizontal Line</p>
-                    <p className="text-zinc-600 dark:text-zinc-400">Click to select the nearest horizontal line so you can customize its color and thickness.</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center gap-1">
-                <input
-                  type="color"
-                  onChange={(e) => {
-                    const updated = editor.chain().focus().updateHorizontalRule({ color: e.target.value }).run();
-                    if (!updated) {
-                      editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ color: e.target.value }).run();
+                  }
+                  
+                  return hrNode?.attrs.spacingBefore || "default";
+                })()}
+                onChange={(e) => {
+                  const spacingBefore = e.target.value === "default" ? null : e.target.value;
+                  const updated = editor.chain().focus().updateHorizontalRule({ spacingBefore }).run();
+                  if (!updated) {
+                    editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ spacingBefore }).run();
+                  }
+                }}
+                className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
+                title="Spacing Before"
+              >
+                <option value="default">Spacing Before</option>
+                <option value="0">0px</option>
+                <option value="0.5rem">0.5rem</option>
+                <option value="1rem">1rem</option>
+                <option value="1.5rem">1.5rem</option>
+                <option value="2rem">2rem</option>
+                <option value="2.5rem">2.5rem</option>
+                <option value="3rem">3rem</option>
+              </select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 text-sm">
+                  <p className="font-medium mb-1">Spacing Before</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Control the space above the horizontal line. Higher values create more space before the line.</p>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Horizontal Rule - Spacing After */}
+            <div className="flex gap-1 border-r pr-2 items-center">
+              <select
+                value={(() => {
+                  if (!editor) return "default";
+                  const { state } = editor;
+                  const { selection } = state;
+                  let hrNode = null;
+                  
+                  if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
+                    hrNode = selection.node;
+                  } else {
+                    const { $from } = selection;
+                    if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
+                      hrNode = $from.nodeBefore;
+                    } else if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
+                      hrNode = $from.nodeAfter;
                     }
-                  }}
-                  className="h-8 w-8 cursor-pointer border rounded"
-                  title="Line Color"
-                />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3 text-sm">
-                    <p className="font-medium mb-1">Line Color</p>
-                    <p className="text-zinc-600 dark:text-zinc-400">Click to change the color of the selected horizontal line. If no line is selected, it will find and update the nearest one.</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center gap-1">
-                <select
-                  onChange={(e) => {
-                    const updated = editor.chain().focus().updateHorizontalRule({ thickness: e.target.value }).run();
-                    if (!updated) {
-                      editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ thickness: e.target.value }).run();
-                    }
-                  }}
-                  className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
-                  defaultValue="2px"
-                  title="Line Thickness"
-                >
-                  <option value="1px">Thin</option>
-                  <option value="2px">Medium</option>
-                  <option value="3px">Thick</option>
-                  <option value="4px">Extra Thick</option>
-                </select>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3 text-sm">
-                    <p className="font-medium mb-1">Line Thickness</p>
-                    <p className="text-zinc-600 dark:text-zinc-400">Choose the thickness of the selected horizontal line. Options range from Thin to Extra Thick.</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center gap-1">
-                <select
-                  value={(() => {
-                    if (!editor) return "default";
-                    const { state } = editor;
-                    const { selection } = state;
-                    let hrNode = null;
-                    
-                    if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
-                      hrNode = selection.node;
-                    } else {
-                      const { $from } = selection;
-                      if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
-                        hrNode = $from.nodeBefore;
-                      } else if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
-                        hrNode = $from.nodeAfter;
-                      }
-                    }
-                    
-                    return hrNode?.attrs.spacingBefore || "default";
-                  })()}
-                  onChange={(e) => {
-                    const spacingBefore = e.target.value === "default" ? null : e.target.value;
-                    const updated = editor.chain().focus().updateHorizontalRule({ spacingBefore }).run();
-                    if (!updated) {
-                      editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ spacingBefore }).run();
-                    }
-                  }}
-                  className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
-                  title="Spacing Before"
-                >
-                  <option value="default">Spacing Before</option>
-                  <option value="0">0px</option>
-                  <option value="0.5rem">0.5rem</option>
-                  <option value="1rem">1rem</option>
-                  <option value="1.5rem">1.5rem</option>
-                  <option value="2rem">2rem</option>
-                  <option value="2.5rem">2.5rem</option>
-                  <option value="3rem">3rem</option>
-                </select>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3 text-sm">
-                    <p className="font-medium mb-1">Spacing Before</p>
-                    <p className="text-zinc-600 dark:text-zinc-400">Control the space above the horizontal line. Higher values create more space before the line.</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex items-center gap-1">
-                <select
-                  value={(() => {
-                    if (!editor) return "default";
-                    const { state } = editor;
-                    const { selection } = state;
-                    let hrNode = null;
-                    
-                    if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
-                      hrNode = selection.node;
-                    } else {
-                      const { $from } = selection;
-                      if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
-                        hrNode = $from.nodeBefore;
-                      } else if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
-                        hrNode = $from.nodeAfter;
-                      }
-                    }
-                    
-                    return hrNode?.attrs.spacingAfter || "default";
-                  })()}
-                  onChange={(e) => {
-                    const spacingAfter = e.target.value === "default" ? null : e.target.value;
-                    const updated = editor.chain().focus().updateHorizontalRule({ spacingAfter }).run();
-                    if (!updated) {
-                      editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ spacingAfter }).run();
-                    }
-                  }}
-                  className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
-                  title="Spacing After"
-                >
-                  <option value="default">Spacing After</option>
-                  <option value="0">0px</option>
-                  <option value="0.5rem">0.5rem</option>
-                  <option value="1rem">1rem</option>
-                  <option value="1.5rem">1.5rem</option>
-                  <option value="2rem">2rem</option>
-                  <option value="2.5rem">2.5rem</option>
-                  <option value="3rem">3rem</option>
-                </select>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3 text-sm">
-                    <p className="font-medium mb-1">Spacing After</p>
-                    <p className="text-zinc-600 dark:text-zinc-400">Control the space below the horizontal line. Higher values create more space after the line.</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
+                  }
+                  
+                  return hrNode?.attrs.spacingAfter || "default";
+                })()}
+                onChange={(e) => {
+                  const spacingAfter = e.target.value === "default" ? null : e.target.value;
+                  const updated = editor.chain().focus().updateHorizontalRule({ spacingAfter }).run();
+                  if (!updated) {
+                    editor.chain().focus().selectHorizontalRule().updateHorizontalRule({ spacingAfter }).run();
+                  }
+                }}
+                className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
+                title="Spacing After"
+              >
+                <option value="default">Spacing After</option>
+                <option value="0">0px</option>
+                <option value="0.5rem">0.5rem</option>
+                <option value="1rem">1rem</option>
+                <option value="1.5rem">1.5rem</option>
+                <option value="2rem">2rem</option>
+                <option value="2.5rem">2.5rem</option>
+                <option value="3rem">3rem</option>
+              </select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Info className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 text-sm">
+                  <p className="font-medium mb-1">Spacing After</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Control the space below the horizontal line. Higher values create more space after the line.</p>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Font Color */}
@@ -849,7 +857,18 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
             </div>
 
         {/* Download & Import */}
-        <div className="ml-auto flex gap-2">
+        <div className="flex gap-2">
+        {onSaveTemplate && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onSaveTemplate}
+              className="h-8"
+            >
+              <Save className="h-4 w-4 mr-1" />
+              Save Template
+            </Button>
+          )}
           {onImportHTML && (
             <Button
               variant="outline"
@@ -859,17 +878,6 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
             >
               <Upload className="h-4 w-4 mr-1" />
               Import HTML
-            </Button>
-          )}
-          {onSaveTemplate && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onSaveTemplate}
-              className="h-8"
-            >
-              <Save className="h-4 w-4 mr-1" />
-              Save Template
             </Button>
           )}
           <Button
@@ -898,7 +906,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
         ref={scrollContainerRef}
         id="editor-scroll-container"
         className={cn(
-          "min-h-[500px] max-h-[800px] overflow-y-auto bg-white dark:bg-[#212121]"
+          "min-h-[500px] bg-white dark:bg-[#212121] flex-1"
         )}
       >
         <div className="p-6">
