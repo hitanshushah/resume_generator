@@ -53,9 +53,10 @@ interface ResumeEditorProps {
   onContentChange?: (content: string) => void;
   onImportHTML?: () => void;
   onSaveTemplate?: () => void;
+  onRestoreDefaultTemplate?: () => void;
 }
 
-export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTemplate }: ResumeEditorProps) {
+export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTemplate, onRestoreDefaultTemplate }: ResumeEditorProps) {
   const [originalContent, setOriginalContent] = useState(content);
   const [isMounted, setIsMounted] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -867,6 +868,17 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
             >
               <Save className="h-4 w-4 mr-1" />
               Save Template
+            </Button>
+          )}
+          {onRestoreDefaultTemplate && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRestoreDefaultTemplate}
+              className="h-8"
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              Restore Default Template
             </Button>
           )}
           {onImportHTML && (

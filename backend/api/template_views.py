@@ -84,3 +84,79 @@ def save_template(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+@api_view(['POST'])
+def restore_default_template(request):
+    """
+    Restore default template by setting resume_template to NULL.
+    Expects: user_id
+    """
+    try:
+        user_id = request.data.get('user_id')
+
+        if not user_id:
+            return Response(
+                {'error': 'user_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate user_id
+        try:
+            user_id_int = int(user_id)
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Invalid user_id. Must be a valid integer.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with connection.cursor() as cursor:
+            # Check if user exists
+            cursor.execute("SELECT id FROM users WHERE id = %s", [user_id_int])
+            user_row = cursor.fetchone()
+            
+            if not user_row:
+                return Response(
+                    {'error': f'User with id {user_id_int} does not exist.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Get profile_id from profiles table
+            cursor.execute(
+                "SELECT id FROM profiles WHERE user_id = %s LIMIT 1",
+                [user_id_int]
+            )
+            profile_row = cursor.fetchone()
+            
+            if not profile_row:
+                return Response(
+                    {'error': f'Profile not found for user_id {user_id_int}.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            profile_id = profile_row[0]
+
+            # Set resume_template to NULL
+            cursor.execute(
+                """
+                UPDATE profiles 
+                SET resume_template = NULL, updated_at = NOW()
+                WHERE id = %s
+                """,
+                [profile_id]
+            )
+
+            return Response(
+                {
+                    'success': True,
+                    'message': 'Default template restored successfully',
+                    'profile_id': profile_id
+                },
+                status=status.HTTP_200_OK
+            )
+
+    except Exception as e:
+        return Response(
+            {'error': f'Internal server error: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+

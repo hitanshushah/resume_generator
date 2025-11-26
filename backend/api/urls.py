@@ -15,5 +15,6 @@ urlpatterns = [
     path('generate-resume/', resume_views.generate_resume, name='generate_resume'),
     path('users/<int:user_id>/details/', user_details_views.get_user_details, name='get_user_details'),
     path('save-template/', template_views.save_template, name='save_template'),
+    path('restore-default-template/', template_views.restore_default_template, name='restore_default_template'),
 ]
 

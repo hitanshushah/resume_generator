@@ -28,18 +28,18 @@ ${createSectionHeading("EXPERIENCE")}
 <h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[COMPANY NAME], [JOB TITLE], [LOCATION]</span></h3>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em></span></p>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Tech Stack:</strong> [TECHNOLOGIES]</span></p>
-<ul><li><p><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
+<ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
 ${createSectionHeading("PROJECTS")}
 <h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[PROJECT NAME]</span></h3>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Technologies:</strong> [TECHNOLOGIES]</span></p>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Link:</strong> [PROJECT LINK]</span></p>
-<ul><li><p><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
+<ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
 ${createSectionHeading("SKILLS")}
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[SKILL CATEGORY]:</strong> [SKILLS]</span></p>
 ${createSectionHeading("EDUCATION")}
 <h3><span style="font-family: &quot;Times New Roman&quot;, serif;">[UNIVERSITY NAME], [LOCATION]</span></h3>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[DEGREE TYPE] in [FIELD OF STUDY]</strong></span></p>
-<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em> | CGPA: [CGPA]</span></p>
+<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em> | [CGPA]</span></p>
 ${createSectionHeading("PUBLICATIONS")}
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[PUBLICATION TITLE]</strong></span></p>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;">[PUBLICATION DETAILS]</span></p>
@@ -142,7 +142,7 @@ export default function Home() {
       }
       if (data.cgpa) {
         
-        entry = entry.replace(/CGPA:\s*\[CGPA\]/gi, `CGPA: ${data.cgpa}`);
+        entry = entry.replace(/CGPA:\s*\[CGPA\]/gi, `${data.cgpa}`);
         
         entry = entry.replace(/CGPA\s+[0-9.]+[^<]*/gi, data.cgpa);
         entry = entry.replace(/\[CGPA\]/gi, data.cgpa);
@@ -253,9 +253,63 @@ export default function Home() {
         entry = entry.replace(/\[TECHNOLOGIES\]/gi, techStack);
       }
       if (data.description) {
+
+        const bulletPoints = data.description
+          .split('\n')
+          .map((line: string) => line.replace(/^●\s*/, '').trim())
+          .filter((line: string) => line.length > 0);
         
-        const description = data.description.replace(/\n/g, '').replace(/●\s*/g, '').trim();
-        entry = entry.replace(/\[DESCRIPTION\]/gi, description);
+        if (bulletPoints.length > 0) {
+
+          const listItems = bulletPoints.map((point: string) => 
+            `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${point}</span></p></li>`
+          ).join('');
+          
+
+          entry = entry.replace(
+            /<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>\[DESCRIPTION\]<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>/gi,
+            `<ul>${listItems}</ul>`
+          );
+        }
+      }
+    } else if (type === 'project') {
+      if (data.name || data.project_name) {
+        entry = entry.replace(/\[PROJECT NAME\]/gi, data.name || data.project_name);
+      }
+      if (data.technologies || data.tech_stack) {
+        const tech = Array.isArray(data.technologies) 
+          ? data.technologies.join(', ')
+          : (data.tech_stack || '');
+        if (tech) {
+          entry = entry.replace(/\[TECHNOLOGIES\]/gi, tech);
+        }
+      }
+      const liveLink = data.links && Array.isArray(data.links) 
+        ? data.links.find((link: any) => link.type === 'liveurl')
+        : null;
+      const link = liveLink ? liveLink.url : (data.link || data.project_link || '');
+      if (link) {
+        entry = entry.replace(/\[PROJECT LINK\]/gi, link);
+      }
+      if (data.description) {
+
+        const bulletPoints = data.description
+          .split('\n')
+          .map((line: string) => line.replace(/^●\s*/, '').trim())
+          .filter((line: string) => line.length > 0);
+        
+        if (bulletPoints.length > 0) {
+
+          const listItems = bulletPoints.map((point: string) => 
+            `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${point}</span></p></li>`
+          ).join('');
+          
+
+          entry = entry.replace(
+            /<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>\[DESCRIPTION\]<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>/gi,
+            `<ul>${listItems}</ul>`
+          );
+        }
       }
     }
     
@@ -271,32 +325,30 @@ export default function Home() {
     let content = template;
     const profile = userData.userProfile || {};
     
-    
+
     if (profile.name) {
       const name = profile.name.toUpperCase();
       content = content.replace(/\[NAME\]/gi, name);
     }
     
-    
+
     const city = profile.city || '';
     const state = profile.state || profile.province || '';
     const location = [city, state].filter(Boolean).join(', ');
     if (location) {
       content = content.replace(/\[CITY\],\s*\[STATE\/PROVINCE\]/gi, location);
-    } else {
-      content = content.replace(/\[CITY\],\s*\[STATE\/PROVINCE\]/gi, '[CITY], [STATE/PROVINCE]');
     }
-    
+    if (city) {
+      content = content.replace(/\[CITY\]/gi, city);
+    }
     
     if (profile.phone_number) {
       content = content.replace(/\[PHONE\]/gi, profile.phone_number);
     }
     
-    
     if (profile.email) {
       content = content.replace(/\[EMAIL\]/gi, profile.email);
     }
-    
     
     const website = profile.personal_website_url || '';
     const userLinks = profile.links || [];
@@ -308,81 +360,231 @@ export default function Home() {
     const linksText = linkTexts.length > 0 ? linkTexts.join(' | ') : '[LINKEDIN] | [WEBSITE]';
     content = content.replace(/\[LINKEDIN\]\s*\|\s*\[WEBSITE\]/gi, linksText);
     
+    if (profile.bio) {
+      content = content.replace(/\[SUMMARY\]/gi, profile.bio);
+    }
     
-    const replaceSectionWithMultipleEntries = (
-      sectionName: string,
-      items: any[],
-      entryPattern: RegExp,
-      entryType: string
-    ) => {
-      if (items.length === 0) return;
+
+
+    
+    const processSection = (sectionName: string, items: any[], entryType: string) => {
+      if (!items || items.length === 0) return;
       
-      
-      
-      const sectionPattern = new RegExp(
-        `(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>${sectionName}<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>${sectionName}<\/strong><\/span><\/p><hr[^>]*>)([\\s\\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<h2|<h3|$)`,
+
+      const sectionHeadingPattern = new RegExp(
+        `(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>${sectionName}<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>${sectionName}<\/strong><\/span><\/p><hr[^>]*>)`,
         'i'
       );
       
-      const sectionMatch = content.match(sectionPattern);
-      if (sectionMatch) {
-        const sectionHeader = sectionMatch[1];
-        const sectionContent = sectionMatch[2];
-        
-        
-        const entryMatch = sectionContent.match(entryPattern);
-        
-        if (entryMatch) {
-          
-          
-          const entryTemplate = entryMatch[1];
-          
-          
-          const entries = items.map((item: any) => {
-            
-            
-            const freshTemplate = entryTemplate.slice(); 
-            return replaceEntryPlaceholders(freshTemplate, item, entryType);
-          }).join('');
-          
-          
-          content = content.replace(sectionPattern, sectionHeader + entries);
+      const sectionMatch = content.match(sectionHeadingPattern);
+      if (!sectionMatch) return;
+      
+      const headingEnd = sectionMatch.index! + sectionMatch[0].length;
+      
+
+      const nextSectionPattern = /<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>/i;
+      const remainingContent = content.substring(headingEnd);
+      const nextSectionMatch = remainingContent.match(nextSectionPattern);
+      const sectionEnd = nextSectionMatch 
+        ? headingEnd + nextSectionMatch.index!
+        : content.length;
+      
+      const sectionContent = content.substring(headingEnd, sectionEnd);
+      
+
+      let placeholderPattern: RegExp;
+      let entryStartTag = '';
+      let nextEntryMarker = '';
+      
+      if (entryType === 'experience') {
+        placeholderPattern = /\[COMPANY NAME\]/i;
+        entryStartTag = '<h3';
+        nextEntryMarker = '<h3';
+      } else if (entryType === 'project') {
+        placeholderPattern = /\[PROJECT NAME\]/i;
+        entryStartTag = '<h3';
+        nextEntryMarker = '<h3';
+      } else if (entryType === 'education') {
+        placeholderPattern = /\[UNIVERSITY NAME\]/i;
+        entryStartTag = '<h3';
+        nextEntryMarker = '<h3';
+      } else if (entryType === 'publication') {
+        placeholderPattern = /\[PUBLICATION TITLE\]/i;
+        entryStartTag = '<p';
+        nextEntryMarker = '[PUBLICATION TITLE]';
+      } else if (entryType === 'certification') {
+        placeholderPattern = /\[CERTIFICATION NAME\]/i;
+        entryStartTag = '<p';
+        nextEntryMarker = '[CERTIFICATION NAME]';
+      } else if (entryType === 'achievement') {
+        placeholderPattern = /\[ACHIEVEMENT DESCRIPTION\]/i;
+        entryStartTag = '<p';
+        nextEntryMarker = '[ACHIEVEMENT DESCRIPTION]';
+      } else {
+        return; // Unknown entry type
+      }
+      
+
+      const placeholderIndex = sectionContent.search(placeholderPattern);
+      if (placeholderIndex === -1) return;
+      
+
+      let entryStartIndex = 0;
+      
+      if (entryType === 'certification' || entryType === 'publication' || entryType === 'achievement') {
+
+
+
+        const beforePlaceholder = sectionContent.substring(0, placeholderIndex);
+
+
+        let lastPStart = beforePlaceholder.lastIndexOf('<p');
+        if (lastPStart !== -1) {
+
+          const between = sectionContent.substring(lastPStart, placeholderIndex);
+          const hasClosingP = between.includes('</p>');
+          if (!hasClosingP) {
+            entryStartIndex = lastPStart;
+          } else {
+
+
+            const beforeClosing = beforePlaceholder.substring(0, lastPStart);
+            const prevPStart = beforeClosing.lastIndexOf('<p');
+            if (prevPStart !== -1) {
+              entryStartIndex = prevPStart;
+            }
+          }
+        }
+      } else {
+
+        const beforePlaceholder = sectionContent.substring(0, placeholderIndex);
+        const lastEntryStart = beforePlaceholder.lastIndexOf(entryStartTag);
+        if (lastEntryStart !== -1) {
+          entryStartIndex = lastEntryStart;
         }
       }
+      
+
+      let entryEndIndex = sectionContent.length;
+      const afterCurrentEntry = sectionContent.substring(entryStartIndex);
+      
+      if (nextEntryMarker.startsWith('<')) {
+
+
+        if (entryType === 'experience' || entryType === 'project') {
+          const ulEndMatch = afterCurrentEntry.match(/<\/ul>/i);
+          if (ulEndMatch) {
+            const afterUl = ulEndMatch.index! + ulEndMatch[0].length;
+            const nextH3 = afterCurrentEntry.substring(afterUl).search(/<h3/i);
+            entryEndIndex = entryStartIndex + (nextH3 > 0 ? afterUl + nextH3 : afterUl);
+          }
+        } else {
+
+          const nextH3 = afterCurrentEntry.substring(1).search(/<h3/i);
+          entryEndIndex = nextH3 > 0 ? entryStartIndex + 1 + nextH3 : sectionContent.length;
+        }
+      } else {
+
+
+        const pEndMatches = [...afterCurrentEntry.matchAll(/<\/p>/gi)];
+        
+        if (pEndMatches.length > 0) {
+
+
+
+          let selectedPEndIndex = pEndMatches.length - 1; // Default to last </p>
+          
+
+          for (let i = 0; i < pEndMatches.length; i++) {
+            const pEndPos = pEndMatches[i].index! + pEndMatches[i][0].length;
+            const afterThisP = afterCurrentEntry.substring(pEndPos);
+            const nextMarkerIndex = afterThisP.search(new RegExp(nextEntryMarker, 'i'));
+            
+            if (nextMarkerIndex > 0) {
+
+              selectedPEndIndex = i;
+              break;
+            }
+          }
+          
+          const selectedPEnd = pEndMatches[selectedPEndIndex];
+          const afterP = selectedPEnd.index! + selectedPEnd[0].length;
+          entryEndIndex = entryStartIndex + afterP;
+        } else {
+
+          const nextMarkerIndex = afterCurrentEntry.substring(1).search(new RegExp(nextEntryMarker, 'i'));
+          entryEndIndex = nextMarkerIndex > 0 ? entryStartIndex + 1 + nextMarkerIndex : sectionContent.length;
+        }
+      }
+      
+
+      const entryTemplate = sectionContent.substring(entryStartIndex, entryEndIndex);
+      
+
+      const entries = items.map((item: any) => {
+        let entry = entryTemplate;
+        entry = replaceEntryPlaceholders(entry, item, entryType);
+        return entry;
+      }).join('');
+      
+
+      const newSectionContent = sectionMatch[0] + entries;
+      content = content.substring(0, sectionMatch.index!) + 
+                newSectionContent + 
+                content.substring(sectionEnd);
     };
     
+
+    if (userData.experiences && userData.experiences.length > 0) {
+      processSection('EXPERIENCE', userData.experiences, 'experience');
+    }
+    
+    if (userData.projects && userData.projects.length > 0) {
+      processSection('PROJECTS', userData.projects, 'project');
+    }
     
     if (userData.education && userData.education.length > 0) {
-      
-      
-      
-      
-      const educationEntryPattern = /(<p[^>]*data-spacing-after[^>]*>.*?\[LOCATION\].*?University.*?\[DEGREE TYPE\].*?\[START DATE\].*?\[END DATE\].*?<\/span><\/p>[\s\S]*?<p[^>]*data-spacing-before[^>]*>.*?CGPA.*?<\/span><\/p>|<p[^>]*>.*?\[LOCATION\].*?University.*?\[DEGREE TYPE\].*?\[START DATE\].*?\[END DATE\].*?<\/p>[\s\S]*?<p[^>]*>.*?CGPA.*?<\/p>|<p[^>]*>.*?\[UNIVERSITY NAME\].*?\[LOCATION\].*?\[DEGREE TYPE\].*?\[START DATE\].*?\[END DATE\].*?(?:CGPA:.*?\[CGPA\])?.*?<\/p>|<h3[^>]*>.*?\[UNIVERSITY NAME\].*?\[LOCATION\].*?<\/h3>[\s\S]*?<p[^>]*>.*?\[DEGREE TYPE\].*?\[FIELD OF STUDY\].*?<\/p>[\s\S]*?<p[^>]*>.*?\[START DATE\].*?\[END DATE\].*?(?:CGPA:.*?\[CGPA\])?.*?<\/p>)/i;
-      replaceSectionWithMultipleEntries('EDUCATION', userData.education, educationEntryPattern, 'education');
+      processSection('EDUCATION', userData.education, 'education');
     }
-    
     
     if (userData.publications && userData.publications.length > 0) {
-      
-      
-      const publicationEntryPattern = /(<p[^>]*><span[^>]*><strong>\[PUBLICATION TITLE\]<\/strong>.*?<\/span><\/p>[\s\S]*?<p[^>]*><span[^>]*>\[PUBLICATION DETAILS\].*?<\/span><\/p>|<p[^>]*><span[^>]*><strong>\[PUBLICATION TITLE\]<\/strong>.*?<\/span><\/p>)/i;
-      replaceSectionWithMultipleEntries('PUBLICATIONS', userData.publications, publicationEntryPattern, 'publication');
+      processSection('PUBLICATIONS', userData.publications, 'publication');
     }
-    
     
     if (userData.certifications && userData.certifications.length > 0) {
-      const certificationEntryPattern = /(<p[^>]*><span[^>]*>\[CERTIFICATION NAME\].*?<\/p>)/i;
-      replaceSectionWithMultipleEntries('CERTIFICATIONS', userData.certifications, certificationEntryPattern, 'certification');
+      processSection('CERTIFICATIONS', userData.certifications, 'certification');
     }
-    
     
     if (userData.achievements && userData.achievements.length > 0) {
-      const achievementEntryPattern = /(<p[^>]*><span[^>]*>\[ACHIEVEMENT DESCRIPTION\].*?<\/p>)/i;
-      replaceSectionWithMultipleEntries('ACHIEVEMENTS', userData.achievements, achievementEntryPattern, 'achievement');
+      processSection('ACHIEVEMENTS', userData.achievements, 'achievement');
     }
     
-    
-    
+
+    if (userData.skills && userData.skills.length > 0) {
+      const skillsSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>SKILLS<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>SKILLS<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+      const skillsSectionMatch = content.match(skillsSectionPattern);
+      
+      if (skillsSectionMatch) {
+        const sectionHeader = skillsSectionMatch[1];
+        
+        const skillsByCategory: Record<string, string[]> = {};
+        userData.skills.forEach((skill: any) => {
+          const categoryName = skill.category?.name || 'Other';
+          if (!skillsByCategory[categoryName]) {
+            skillsByCategory[categoryName] = [];
+          }
+          skillsByCategory[categoryName].push(skill.name);
+        });
+        
+        const skillsHtml = Object.entries(skillsByCategory)
+          .map(([category, skillNames]) => {
+            return `<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>${category}:</strong> ${skillNames.join(', ')}</span></p>`;
+          })
+          .join('');
+        
+        content = content.replace(skillsSectionPattern, sectionHeader + skillsHtml);
+      }
+    }
     
     return content;
   };
@@ -453,10 +655,10 @@ export default function Home() {
                 const degree = edu.degree || '[DEGREE TYPE] in [FIELD OF STUDY]';
                 const fromDate = formatDate(edu.from_date) || '[START DATE]';
                 const endDate = edu.end_date ? formatDate(edu.end_date) : 'Present';
-                const cgpa = edu.cgpa ? `CGPA: ${edu.cgpa}` : '';
+                const cgpa = edu.cgpa ? `${edu.cgpa}` : '';
                 return `<h3><span style="font-family: &quot;Times New Roman&quot;, serif;">${university}, ${location}</span></h3><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>${degree}</strong></span></p><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>${fromDate} - ${endDate}</em>${cgpa ? ` | ${cgpa}` : ''}</span></p>`;
               }).join('')
-            : '<h3><span style="font-family: &quot;Times New Roman&quot;, serif;">[UNIVERSITY NAME], [LOCATION]</span></h3><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[DEGREE TYPE] in [FIELD OF STUDY]</strong></span></p><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em> | CGPA: [CGPA]</span></p>';
+            : '<h3><span style="font-family: &quot;Times New Roman&quot;, serif;">[UNIVERSITY NAME], [LOCATION]</span></h3><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[DEGREE TYPE] in [FIELD OF STUDY]</strong></span></p><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em> | [CGPA]</span></p>';
 
           
           const publicationsHtml = data.publications && data.publications.length > 0
@@ -501,12 +703,12 @@ ${createSectionHeading("EXPERIENCE")}
 <h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[COMPANY NAME], [JOB TITLE], [LOCATION]</span></h3>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em></span></p>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Tech Stack:</strong> [TECHNOLOGIES]</span></p>
-<ul><li><p><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
+<ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
 ${createSectionHeading("PROJECTS")}
 <h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[PROJECT NAME]</span></h3>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Technologies:</strong> [TECHNOLOGIES]</span></p>
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Link:</strong> [PROJECT LINK]</span></p>
-<ul><li><p><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
+<ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
 ${createSectionHeading("SKILLS")}
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[SKILL CATEGORY]:</strong> [SKILLS]</span></p>
 
@@ -545,7 +747,7 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
         const degree = edu.degree || '';
         const fromDate = formatDate(edu.from_date) || '';
         const endDate = edu.end_date ? formatDate(edu.end_date) : 'Present';
-        const cgpa = edu.cgpa ? ` | CGPA: ${edu.cgpa}` : '';
+        const cgpa = edu.cgpa ? ` | ${edu.cgpa}` : '';
         html += `<h3><span style="font-family: &quot;Times New Roman&quot;, serif;">${university}${location ? `, ${location}` : ''}</span></h3>`;
         html += `<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>${degree}</strong></span></p>`;
         html += `<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>${fromDate} - ${endDate}</em>${cgpa}</span></p>`;
@@ -594,7 +796,7 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
 
   
   useEffect(() => {
-    if (Object.keys(sections).length > 0 && userDetails) {
+    if (userDetails) {
       
       const profile = userDetails.userProfile || {};
       const name = (profile.name || '[NAME]').toUpperCase();
@@ -615,147 +817,94 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
       const headerSection = `<p data-spacing-after="0" style="text-align: center; margin-bottom: 0px;"><span style="font-size: 24px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(77, 16, 47);"><strong>${name}</strong></span></p><hr data-width="100%" data-color="#4d102f" data-thickness="2px" data-spacing-before="0" data-spacing-after="0.5rem" style="border-right: none; border-bottom: none; border-left: none; border-image: initial; border-top: 2px solid rgb(77, 16, 47); width: 100%; margin-top: 0px; margin-bottom: 0.5rem; display: block;"><p data-spacing-before="0" data-spacing-after="0" style="text-align: center; margin-top: 0px; margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${location} | ${phone} | ${email}</span></p><p data-spacing-before="0" style="text-align: center; margin-top: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${linksText}</span></p>`;
 
       
-      const formatSectionContent = (content: string, sectionKey: string) => {
-        
-        const sectionTitles: Record<string, string> = {
-          'experience': 'EXPERIENCE',
-          'projects': 'PROJECTS',
-          'skills': 'SKILLS'
-        };
-        
-        const sectionTitle = sectionTitles[sectionKey];
-        let processedContent = content.trim();
-        
-        
-        if (sectionTitle) {
-          processedContent = processedContent.replace(
-            new RegExp(`<h2[^>]*>\\s*${sectionTitle}\\s*</h2>`, 'gi'),
-            ''
-          );
-          
-          processedContent = processedContent.replace(/^<h2[^>]*>.*?<\/h2>\s*/i, '');
-        }
-        
-        
-        
-        const hasStyling = processedContent.includes('font-family');
-        
-        if (!hasStyling) {
-          processedContent = processedContent
-            .replace(/<p([^>]*)>/g, '<p$1><span style="font-family: &quot;Times New Roman&quot;, serif;">')
-            .replace(/<\/p>/g, '</span></p>')
-            .replace(/<h3([^>]*)>/g, '<h3$1><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">')
-            .replace(/<\/h3>/g, '</span></h3>')
-            .replace(/<li([^>]*)>/g, '<li$1><p><span style="font-family: &quot;Times New Roman&quot;, serif;">')
-            .replace(/<\/li>/g, '</span></p></li>');
-        }
-        
-        
-        if (sectionTitle) {
-          return `${createSectionHeading(sectionTitle)}${processedContent}`;
-        }
-        
-        return processedContent;
-      };
-
-      
-      const modelSections = Object.entries(sections)
-        .filter(([key]) => ['profile', 'experience', 'projects', 'skills'].includes(key))
-        .sort(([keyA], [keyB]) => {
-          const order = ['profile', 'experience', 'projects', 'skills'];
-          return order.indexOf(keyA) - order.indexOf(keyB);
-        })
-        .map(([key, section]) => {
-          
-          if (key === 'profile') {
-            const content = section.content.trim();
-            
-            let summaryContent = content
-              .replace(/<h[1-6][^>]*>.*?<\/h[1-6]>/gi, '') 
-              .replace(/<p>.*?\|.*?\|.*?<\/p>/gi, '') 
-              .replace(/<p>.*?@.*?<\/p>/gi, '') 
-              .replace(/<p>.*?http.*?<\/p>/gi, 'i') 
-              .trim();
-            
-            
-            summaryContent = summaryContent.replace(/<p>\s*<\/p>/gi, '').trim();
-            
-            
-            if (summaryContent && !summaryContent.includes('font-family')) {
-              summaryContent = summaryContent
-                .replace(/<p>/g, '<p><span style="font-family: &quot;Times New Roman&quot;, serif;">')
-                .replace(/<\/p>/g, '</span></p>');
-            }
-            
-            
-            if (summaryContent) {
-              return `${createSectionHeading("SUMMARY")}${summaryContent}`;
-            } else {
-              return `${createSectionHeading("SUMMARY")}<p><span style="font-family: &quot;Times New Roman&quot;, serif;">[SUMMARY]</span></p>`;
-            }
-          }
-          
-          const content = section.content.trim();
-          const isHTML = content.includes('<') && (content.includes('</') || content.includes('/>') || content.includes('<h') || content.includes('<p') || content.includes('<ul') || content.includes('<li'));
-          
-          if (isHTML) {
-            return formatSectionContent(content, key);
-          } else {
-            
-            const lines = content.split('\n').filter(line => line.trim());
-            const htmlLines = lines.map(line => {
-              const trimmed = line.trim();
-              if (trimmed.match(/^#{1,6}\s/)) {
-                const level = trimmed.match(/^#+/)?.[0].length || 2;
-                const text = trimmed.replace(/^#+\s*/, '');
-                if (level === 2) {
-                  
-                  return createSectionHeading(text.toUpperCase());
-                }
-                return `<h${Math.min(level, 6)}><span style="font-size: ${level === 3 ? '18px' : '20px'}; font-family: &quot;Times New Roman&quot;, serif;">${text}</span></h${Math.min(level, 6)}>`;
-              }
-              if (trimmed.match(/^[-*]\s/)) {
-                return `<li><p><span style="font-family: &quot;Times New Roman&quot;, serif;">${trimmed.replace(/^[-*]\s*/, '')}</span></p></li>`;
-              }
-              return `<p><span style="font-family: &quot;Times New Roman&quot;, serif;">${trimmed}</span></p>`;
-            });
-            
-            let result = '';
-            let inList = false;
-            for (let i = 0; i < htmlLines.length; i++) {
-              if (htmlLines[i].startsWith('<li>')) {
-                if (!inList) {
-                  result += '<ul>';
-                  inList = true;
-                }
-                result += htmlLines[i];
-              } else {
-                if (inList) {
-                  result += '</ul>';
-                  inList = false;
-                }
-                result += htmlLines[i];
-              }
-            }
-            if (inList) {
-              result += '</ul>';
-            }
-            
-            
-            return formatSectionContent(result, key);
-          }
-        })
-        .join("");
-
-      
       const staticSections = buildStaticSections(userDetails);
 
       
-      const hasProfileSection = Object.keys(sections).includes('profile');
-      const professionalSummaryPlaceholder = hasProfileSection ? '' : `${createSectionHeading("SUMMARY")}<p><span style="font-family: &quot;Times New Roman&quot;, serif;">[SUMMARY]</span></p>`;
+      const bio = profile.bio || '[SUMMARY]';
+      const summarySection = `${createSectionHeading("SUMMARY")}<p><span style="font-family: &quot;Times New Roman&quot;, serif;">${bio}</span></p>`;
       
       
-      const combinedContent = `${headerSection}\n\n${professionalSummaryPlaceholder}${professionalSummaryPlaceholder ? '\n\n' : ''}${modelSections}\n\n${staticSections}`;
+      const experienceSection = userDetails.experiences && userDetails.experiences.length > 0
+        ? `${createSectionHeading("EXPERIENCE")}${userDetails.experiences.map((exp: any) => {
+            const company = exp.company_name || '[COMPANY NAME]';
+            const role = exp.role || exp.job_title || '[JOB TITLE]';
+            const loc = exp.location || '[LOCATION]';
+            const startDate = exp.start_date ? formatDate(exp.start_date) : '[START DATE]';
+            const endDate = exp.end_date ? formatDate(exp.end_date) : 'Present';
+            const techStack = exp.skills && Array.isArray(exp.skills) ? exp.skills.join(', ') : '[TECHNOLOGIES]';
+            const description = exp.description || '[DESCRIPTION]';
+            
+
+            const bulletPoints = description
+              .split('\n')
+              .map((line: string) => line.replace(/^●\s*/, '').trim())
+              .filter((line: string) => line.length > 0);
+            
+            const listItems = bulletPoints.length > 0
+              ? bulletPoints.map((point: string) => 
+                  `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${point}</span></p></li>`
+                ).join('')
+              : `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${description}</span></p></li>`;
+            
+            return `<h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">${company}, ${role}, ${loc}</span></h3><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>${startDate} - ${endDate}</em></span></p><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Tech Stack:</strong> ${techStack}</span></p><ul>${listItems}</ul>`;
+          }).join('')}`
+        : `${createSectionHeading("EXPERIENCE")}<h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[COMPANY NAME], [JOB TITLE], [LOCATION]</span></h3><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em></span></p><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Tech Stack:</strong> [TECHNOLOGIES]</span></p><ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>`;
+      
+      
+      const projectsSection = userDetails.projects && userDetails.projects.length > 0
+        ? `${createSectionHeading("PROJECTS")}${userDetails.projects.map((proj: any) => {
+            const name = proj.name || proj.project_name || '[PROJECT NAME]';
+            const tech = (proj.technologies && Array.isArray(proj.technologies) ? proj.technologies.join(', ') : proj.tech_stack) || '[TECHNOLOGIES]';
+            
+            const liveLink = proj.links && Array.isArray(proj.links) 
+              ? proj.links.find((link: any) => link.type === 'liveurl')
+              : null;
+            const link = liveLink ? liveLink.url : '[PROJECT LINK]';
+            
+            const description = proj.description || '[DESCRIPTION]';
+            
+
+            const bulletPoints = description
+              .split('\n')
+              .map((line: string) => line.replace(/^●\s*/, '').trim())
+              .filter((line: string) => line.length > 0);
+            
+            const listItems = bulletPoints.length > 0
+              ? bulletPoints.map((point: string) => 
+                  `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${point}</span></p></li>`
+                ).join('')
+              : `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${description}</span></p></li>`;
+            
+            return `<h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">${name}</span></h3><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Technologies:</strong> ${tech}</span></p>${link !== '[PROJECT LINK]' ? `<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Link:</strong> ${link}</span></p>` : ''}<ul>${listItems}</ul>`;
+          }).join('')}`
+        : `${createSectionHeading("PROJECTS")}<h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[PROJECT NAME]</span></h3><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Technologies:</strong> [TECHNOLOGIES]</span></p><p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Link:</strong> [PROJECT LINK]</span></p><ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>`;
+      
+      
+      const skillsSection = (() => {
+        if (!userDetails.skills || userDetails.skills.length === 0) {
+          return `${createSectionHeading("SKILLS")}<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[SKILL CATEGORY]:</strong> [SKILLS]</span></p>`;
+        }
+        
+        const skillsByCategory: Record<string, string[]> = {};
+        userDetails.skills.forEach((skill: any) => {
+          const categoryName = skill.category?.name || 'Other';
+          if (!skillsByCategory[categoryName]) {
+            skillsByCategory[categoryName] = [];
+          }
+          skillsByCategory[categoryName].push(skill.name);
+        });
+        
+        const skillsHtml = Object.entries(skillsByCategory)
+          .map(([category, skillNames]) => {
+            return `<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>${category}:</strong> ${skillNames.join(', ')}</span></p>`;
+          })
+          .join('');
+        
+        return `${createSectionHeading("SKILLS")}${skillsHtml}`;
+      })();
+      
+      
+      const combinedContent = `${headerSection}\n\n${summarySection}\n\n${experienceSection}\n\n${projectsSection}\n\n${skillsSection}\n\n${staticSections}`;
       
       
       if (savedTemplate && Object.keys(sections).length === 0) {
@@ -765,12 +914,14 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
         templateWithData = formatDatesInContent(templateWithData);
         setResumeContent(templateWithData);
       } else {
-        
-        const formattedContent = formatDatesInContent(combinedContent);
-        setResumeContent(formattedContent);
+
+
+        let templateWithData = replacePlaceholdersWithData(TEMPLATE_RESUME_CONTENT, userDetails);
+        templateWithData = formatDatesInContent(templateWithData);
+        setResumeContent(templateWithData);
       }
     }
-  }, [sections, userDetails, savedTemplate]);
+  }, [userDetails, savedTemplate, sections]);
 
   const generateResume = async () => {
     if (!prompt.trim() || !jobDescription.trim()) {
@@ -947,6 +1098,73 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
     
     const profile = userDetails.userProfile || {};
     
+
+    const allowedTags = ['h3', 'h1', 'h2', 'p', 'em'];
+    
+
+    const replaceValueInAllowedTags = (
+      content: string,
+      value: string,
+      placeholder: string,
+      tags: string[] = allowedTags
+    ): string => {
+      if (!value) return content;
+      
+      const escapedValue = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      for (const tag of tags) {
+
+        const tagPattern = new RegExp(`(<${tag}[^>]*>)([\\s\\S]*?)(<\\/${tag}>)`, 'gi');
+        
+        content = content.replace(tagPattern, (match, openTag, tagContent, closeTag) => {
+
+          if (new RegExp(escapedValue, 'i').test(tagContent)) {
+
+            const updatedContent = tagContent.replace(new RegExp(escapedValue, 'gi'), placeholder);
+            return openTag + updatedContent + closeTag;
+          }
+          return match;
+        });
+      }
+      
+      return content;
+    };
+    
+
+    const extractTextContent = (html: string): string => {
+      return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+    };
+    
+
+    const replaceValueInNestedStructures = (
+      content: string,
+      value: string,
+      placeholder: string,
+      structurePattern: RegExp
+    ): string => {
+      if (!value) return content;
+      
+      const cleanValue = extractTextContent(value).replace(/\n/g, ' ').replace(/●\s*/g, '').replace(/\s+/g, ' ').trim();
+      
+      return content.replace(structurePattern, (match, openTags, innerContent, closeTags) => {
+        const cleanInner = extractTextContent(innerContent);
+        
+
+        const lengthDiff = Math.abs(cleanInner.length - cleanValue.length);
+        const maxLength = Math.max(cleanInner.length, cleanValue.length);
+        
+        if (lengthDiff / maxLength < 0.2 || 
+            cleanInner === cleanValue || 
+            cleanInner.includes(cleanValue) || 
+            cleanValue.includes(cleanInner) ||
+            (cleanInner.length > 50 && cleanValue.length > 50 && 
+             (cleanInner.substring(0, 50) === cleanValue.substring(0, 50) || 
+              cleanInner.substring(cleanInner.length - 50) === cleanValue.substring(cleanValue.length - 50)))) {
+          return openTags + placeholder + closeTags;
+        }
+        return match;
+      });
+    };
     
     if (profile.name) {
       const name = profile.name.toUpperCase();
@@ -957,8 +1175,24 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
     const city = profile.city || '';
     const state = profile.state || profile.province || '';
     const location = [city, state].filter(Boolean).join(', ');
-    if (location) {
-      template = template.replace(new RegExp(location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[CITY], [STATE/PROVINCE]');
+    
+
+
+    if (city) {
+
+      if (location && state) {
+
+        template = template.replace(new RegExp(`${location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\|`, 'gi'), '[CITY], [STATE/PROVINCE] |');
+      } else if (city) {
+
+
+        const cityEscaped = city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        template = template.replace(new RegExp(`${cityEscaped}\\s*\\|`, 'gi'), '[CITY] |');
+
+        template = template.replace(new RegExp(`${cityEscaped}(?=\\s*\\|\\s*\\[PHONE\\])`, 'gi'), '[CITY]');
+
+        template = template.replace(new RegExp(`(<p[^>]*>.*?)${cityEscaped}(.*?\\|.*?</p>)`, 'gi'), '$1[CITY]$2');
+      }
     }
     
     const phone = profile.phone_number || '';
@@ -990,118 +1224,577 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
     template = template.replace(/(\[LINKEDIN\]\s*\|\s*\[WEBSITE\])(\s*\|\s*\[LINKEDIN\]\s*\|\s*\[WEBSITE\])+/gi, '$1');
     
     
-    if (userDetails.education && userDetails.education.length > 0) {
-      
-      const seenValues = new Set<string>();
-      userDetails.education.forEach((edu: any) => {
-        if (edu.university_name && !seenValues.has(edu.university_name)) {
-          template = template.replace(new RegExp(edu.university_name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[UNIVERSITY NAME]');
-          seenValues.add(edu.university_name);
+    if (profile.bio) {
+
+      const bioText = profile.bio.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      template = template.replace(new RegExp(bioText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[SUMMARY]');
+
+      const bioEscaped = profile.bio.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      if (bioEscaped !== profile.bio) {
+        template = template.replace(new RegExp(bioEscaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[SUMMARY]');
+      }
+
+      const summaryPattern = /(<p[^>]*><span[^>]*>)(.*?)(<\/span><\/p>)/gi;
+      template = template.replace(summaryPattern, (match, openTag, content, closeTag) => {
+
+        const cleanContent = content.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim();
+        const cleanBio = profile.bio.replace(/\s+/g, ' ').trim();
+        if (cleanContent === cleanBio || cleanContent.includes(cleanBio) || cleanBio.includes(cleanContent)) {
+          return openTag + '[SUMMARY]' + closeTag;
         }
-        if (edu.location && !seenValues.has(`loc_${edu.location}`)) {
-          template = template.replace(new RegExp(edu.location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[LOCATION]');
-          seenValues.add(`loc_${edu.location}`);
-        }
-        if (edu.degree && !seenValues.has(edu.degree)) {
-          template = template.replace(new RegExp(edu.degree.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[DEGREE TYPE] in [FIELD OF STUDY]');
-          seenValues.add(edu.degree);
-        }
-        if (edu.from_date && !seenValues.has(edu.from_date)) {
-          template = template.replace(new RegExp(edu.from_date.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[START DATE]');
-          seenValues.add(edu.from_date);
-        }
-        if (edu.end_date && !seenValues.has(edu.end_date)) {
-          template = template.replace(new RegExp(edu.end_date.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[END DATE]');
-          seenValues.add(edu.end_date);
-        }
-        if (edu.cgpa && !seenValues.has(`cgpa_${edu.cgpa}`)) {
-          template = template.replace(new RegExp(`CGPA:?\\s*${edu.cgpa.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi'), 'CGPA: [CGPA]');
-          seenValues.add(`cgpa_${edu.cgpa}`);
-        }
+        return match;
       });
+    }
+    
+    
+    if (userDetails.experiences && userDetails.experiences.length > 0) {
+      const firstExp = userDetails.experiences[0];
       
+      const experienceSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>EXPERIENCE<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>EXPERIENCE<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+      const experienceSectionMatch = template.match(experienceSectionPattern);
       
-      
-      
-      const educationBlockPattern = /(<h3[^>]*>.*?\[UNIVERSITY NAME\].*?\[LOCATION\].*?<\/h3>[\s\S]*?<p[^>]*>.*?\[START DATE\].*?\[END DATE\].*?(?:CGPA:.*?\[CGPA\])?.*?<\/p>)/gi;
-      const educationMatches = template.match(educationBlockPattern);
-      if (educationMatches && educationMatches.length > 1) {
+      if (experienceSectionMatch) {
+        const experienceContent = experienceSectionMatch[2];
         
-        let isFirst = true;
-        template = template.replace(educationBlockPattern, (match) => {
-          if (isFirst) {
-            isFirst = false;
-            return match;
-          }
-          return ''; 
-        });
+
+        const experienceEntryPattern = new RegExp(
+          `(<(?:${allowedTags.join('|')})[^>]*>.*?<\\/(?:${allowedTags.join('|')})>[\\s\\S]*?<ul>[\\s\\S]*?<\\/ul>)`,
+          'gi'
+        );
+        const experienceEntries = experienceContent.match(experienceEntryPattern);
         
-        template = template.replace(/\s*<h3[^>]*>\[UNIVERSITY NAME\].*?<\/h3>\s*/gi, (match, offset) => {
+        if (experienceEntries && experienceEntries.length > 0) {
+          let firstEntryTemplate = experienceEntries[0];
           
-          return match;
-        });
+
+          if (firstExp.company_name) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstExp.company_name, '[COMPANY NAME]');
+          }
+          
+
+          if (firstExp.role || firstExp.job_title) {
+            const role = firstExp.role || firstExp.job_title;
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, role, '[JOB TITLE]');
+          }
+          
+
+          if (firstExp.location) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstExp.location, '[LOCATION]');
+          }
+          
+
+          if (firstExp.start_date) {
+            const formattedStart = formatDate(firstExp.start_date);
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, formattedStart, '[START DATE]');
+
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstExp.start_date, '[START DATE]');
+          }
+          
+          if (firstExp.end_date) {
+            const formattedEnd = formatDate(firstExp.end_date);
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, formattedEnd, '[END DATE]');
+
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstExp.end_date, '[END DATE]');
+          } else {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, 'Present', '[END DATE]');
+          }
+          
+
+          if (firstExp.skills && Array.isArray(firstExp.skills)) {
+            const techStack = firstExp.skills.join(', ');
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, techStack, '[TECHNOLOGIES]');
+          }
+          
+
+          if (firstExp.description) {
+            const descPattern = /(<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)([\s\S]*?)(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>)/gi;
+            firstEntryTemplate = replaceValueInNestedStructures(firstEntryTemplate, firstExp.description, '[DESCRIPTION]', descPattern);
+            
+
+            if (!firstEntryTemplate.includes('[DESCRIPTION]')) {
+              firstEntryTemplate = firstEntryTemplate.replace(/(<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)[\s\S]*?(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>)/gi, '$1[DESCRIPTION]$2');
+            }
+          }
+          
+
+          if (experienceEntries.length > 1) {
+            let isFirst = true;
+            const newExperienceContent = experienceContent.replace(experienceEntryPattern, (match) => {
+              if (isFirst) {
+                isFirst = false;
+                return firstEntryTemplate;
+              }
+              return '';
+            });
+            
+            template = template.replace(experienceSectionPattern, (match, header) => {
+              return header + newExperienceContent;
+            });
+          } else {
+            template = template.replace(experienceSectionPattern, (match, header) => {
+              return header + firstEntryTemplate;
+            });
+          }
+        }
+      }
+    }
+    
+    
+    if (userDetails.projects && userDetails.projects.length > 0) {
+      const firstProj = userDetails.projects[0];
+      
+      const projectsSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>PROJECTS<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>PROJECTS<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+      const projectsSectionMatch = template.match(projectsSectionPattern);
+      
+      if (projectsSectionMatch) {
+        const projectsContent = projectsSectionMatch[2];
+        
+
+        const projectEntryPattern = new RegExp(
+          `(<(?:${allowedTags.join('|')})[^>]*>.*?<\\/(?:${allowedTags.join('|')})>[\\s\\S]*?<ul>[\\s\\S]*?<\\/ul>)`,
+          'gi'
+        );
+        const projectEntries = projectsContent.match(projectEntryPattern);
+        
+        if (projectEntries && projectEntries.length > 0) {
+          let firstEntryTemplate = projectEntries[0];
+          
+
+          if (firstProj.name || firstProj.project_name) {
+            const name = firstProj.name || firstProj.project_name;
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, name, '[PROJECT NAME]');
+          }
+          
+
+          if (firstProj.technologies || firstProj.tech_stack) {
+            const tech = Array.isArray(firstProj.technologies) 
+              ? firstProj.technologies.join(', ')
+              : (firstProj.tech_stack || '');
+            if (tech) {
+              firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, tech, '[TECHNOLOGIES]');
+            }
+          }
+          
+
+          const liveLink = firstProj.links && Array.isArray(firstProj.links) 
+            ? firstProj.links.find((link: any) => link.type === 'liveurl')
+            : null;
+          const link = liveLink ? liveLink.url : (firstProj.link || firstProj.project_link || '');
+          if (link) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, link, '[PROJECT LINK]');
+          }
+          
+
+          if (firstProj.description) {
+            const desc = firstProj.description.replace(/\n/g, '').replace(/●\s*/g, '').trim();
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, desc, '[DESCRIPTION]');
+
+            const descPattern = /(<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)([\s\S]*?)(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>)/gi;
+            firstEntryTemplate = replaceValueInNestedStructures(firstEntryTemplate, firstProj.description, '[DESCRIPTION]', descPattern);
+          }
+          
+
+          if (projectEntries.length > 1) {
+            let isFirst = true;
+            const newProjectsContent = projectsContent.replace(projectEntryPattern, (match) => {
+              if (isFirst) {
+                isFirst = false;
+                return firstEntryTemplate;
+              }
+              return '';
+            });
+            
+            template = template.replace(projectsSectionPattern, (match, header) => {
+              return header + newProjectsContent;
+            });
+          } else {
+            template = template.replace(projectsSectionPattern, (match, header) => {
+              return header + firstEntryTemplate;
+            });
+          }
+        }
+      }
+    }
+    
+    
+
+    const skillsSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>SKILLS<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>SKILLS<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+    const skillsSectionMatch = template.match(skillsSectionPattern);
+    
+    if (skillsSectionMatch) {
+      const skillsContent = skillsSectionMatch[2];
+      
+
+      const skillEntryPattern = new RegExp(
+        `(<(?:${allowedTags.join('|')})[^>]*><span[^>]*><strong>.*?:<\/strong>.*?<\/span><\/(?:${allowedTags.join('|')})>)`,
+        'gi'
+      );
+      const skillEntries = skillsContent.match(skillEntryPattern);
+      
+      if (skillEntries && skillEntries.length > 0) {
+        let firstEntryTemplate = skillEntries[0];
+        
+
+
+        const categoryMatch = firstEntryTemplate.match(/<strong>([^<]*?):<\/strong>/i);
+        if (categoryMatch && categoryMatch[1]) {
+          const categoryName = categoryMatch[1].trim();
+          firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, categoryName, '[SKILL CATEGORY]');
+        }
+        
+
+        const fullMatch = firstEntryTemplate.match(/<strong>.*?<\/strong>\s*([\s\S]*?)\s*<\/span><\/(?:p|h3|h1)>/i);
+        if (fullMatch && fullMatch[1]) {
+          const skillsList = fullMatch[1].trim();
+
+          if (!skillsList.includes('[SKILLS]') && skillsList) {
+            firstEntryTemplate = firstEntryTemplate.replace(
+              new RegExp(skillsList.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+              '[SKILLS]'
+            );
+          }
+        }
+        
+
+        if (skillEntries.length > 1) {
+          let isFirst = true;
+          const newSkillsContent = skillsContent.replace(skillEntryPattern, (match) => {
+            if (isFirst) {
+              isFirst = false;
+              return firstEntryTemplate;
+            }
+            return '';
+          });
+          
+          template = template.replace(skillsSectionPattern, (match, header) => {
+            return header + newSkillsContent;
+          });
+        } else {
+          template = template.replace(skillsSectionPattern, (match, header) => {
+            return header + firstEntryTemplate;
+          });
+        }
+      }
+    }
+    
+    
+    if (userDetails.education && userDetails.education.length > 0) {
+      const firstEdu = userDetails.education[0];
+      
+      const educationSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>EDUCATION<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>EDUCATION<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+      const educationSectionMatch = template.match(educationSectionPattern);
+      
+      if (educationSectionMatch) {
+        const educationContent = educationSectionMatch[2];
+        
+
+
+
+
+        const educationEntryPattern = new RegExp(
+          `(<(?:${allowedTags.join('|')})[^>]*>.*?<\\/(?:${allowedTags.join('|')})>[\\s\\S]*?)(?=<h3[^>]*>|$)`,
+          'gi'
+        );
+        const educationEntries: string[] = [];
+        let match;
+        while ((match = educationEntryPattern.exec(educationContent)) !== null) {
+          educationEntries.push(match[1]);
+        }
+        
+        if (educationEntries && educationEntries.length > 0) {
+          let firstEntryTemplate = educationEntries[0];
+          
+
+          if (firstEdu.university_name) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstEdu.university_name, '[UNIVERSITY NAME]');
+          }
+          
+
+          if (firstEdu.location) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstEdu.location, '[LOCATION]');
+          }
+          
+
+          if (firstEdu.degree) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstEdu.degree, '[DEGREE TYPE] in [FIELD OF STUDY]');
+          }
+          
+
+          if (firstEdu.from_date) {
+            const formattedStart = formatDate(firstEdu.from_date);
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, formattedStart, '[START DATE]');
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstEdu.from_date, '[START DATE]');
+          }
+          
+          if (firstEdu.end_date) {
+            const formattedEnd = formatDate(firstEdu.end_date);
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, formattedEnd, '[END DATE]');
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstEdu.end_date, '[END DATE]');
+          } else {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, 'Present', '[END DATE]');
+          }
+          
+
+          if (firstEdu.cgpa) {
+            const cgpaValue = firstEdu.cgpa.toString();
+
+            firstEntryTemplate = firstEntryTemplate.replace(new RegExp(`CGPA:?\\s*${cgpaValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi'), '[CGPA]');
+
+            firstEntryTemplate = firstEntryTemplate.replace(new RegExp(`CGPA\\s+${cgpaValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi'), 'CGPA [CGPA]');
+
+            firstEntryTemplate = firstEntryTemplate.replace(new RegExp(`(CGPA[^:]*?)\\s*${cgpaValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi'), '$1 [CGPA]');
+
+            firstEntryTemplate = firstEntryTemplate.replace(new RegExp(`CGPA[^<]*?${cgpaValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^<]*?`, 'gi'), '[CGPA]');
+          }
+          
+
+
+          firstEntryTemplate = firstEntryTemplate.replace(/(<em>)((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})\s*-\s*((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|Present)(<\/em>)/gi, '$1[START DATE] - [END DATE]$4');
+
+          firstEntryTemplate = firstEntryTemplate.replace(/CGPA[^<]*?\d+[^<]*?/gi, (match) => {
+            if (!match.includes('[CGPA]')) {
+              return '[CGPA]';
+            }
+            return match;
+          });
+          
+
+          template = template.replace(educationSectionPattern, (match, header) => {
+            return header + firstEntryTemplate;
+          });
+        }
       }
     }
     
     
     if (userDetails.publications && userDetails.publications.length > 0) {
+      const firstPub = userDetails.publications[0];
       
-      const seenValues = new Set<string>();
-      userDetails.publications.forEach((pub: any) => {
-        if (pub.paper_name && !seenValues.has(pub.paper_name)) {
-          template = template.replace(new RegExp(pub.paper_name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[PUBLICATION TITLE]');
-          seenValues.add(pub.paper_name);
-        }
-        if (pub.description || pub.publisher || pub.date) {
-          const details = pub.description || pub.publisher || pub.date || '';
-          if (details && !seenValues.has(`pub_${details}`)) {
-            template = template.replace(new RegExp(details.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[PUBLICATION DETAILS]');
-            seenValues.add(`pub_${details}`);
-          }
-        }
-      });
+      const publicationsSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>PUBLICATIONS<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>PUBLICATIONS<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+      const publicationsSectionMatch = template.match(publicationsSectionPattern);
       
-      
-      
-      const publicationBlockPattern = /(<p[^>]*><span[^>]*><strong>\[PUBLICATION TITLE\]<\/strong>.*?<\/p>\s*<p[^>]*><span[^>]*>\[PUBLICATION DETAILS\].*?<\/p>)/gi;
-      const publicationMatches = template.match(publicationBlockPattern);
-      if (publicationMatches && publicationMatches.length > 1) {
+      if (publicationsSectionMatch) {
+        const publicationsContent = publicationsSectionMatch[2];
         
-        let isFirst = true;
-        template = template.replace(publicationBlockPattern, (match) => {
-          if (isFirst) {
-            isFirst = false;
+
+        const publicationEntryPattern = /(<(?:p|h3|h1)[^>]*><span[^>]*><strong>.*?<\/strong>.*?<\/span><\/(?:p|h3|h1)>\s*<(?:p|h3|h1)[^>]*><span[^>]*>.*?<\/span><\/(?:p|h3|h1)>)/gi;
+        const publicationEntries = publicationsContent.match(publicationEntryPattern);
+        
+        if (publicationEntries && publicationEntries.length > 0) {
+          let firstEntryTemplate = publicationEntries[0];
+          
+
+          if (firstPub.paper_name) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstPub.paper_name, '[PUBLICATION TITLE]');
+          }
+          
+
+          const pubDetailsPattern = /(<(?:p|h3|h1)[^>]*><span[^>]*><strong>.*?<\/strong>.*?<\/span><\/(?:p|h3|h1)>\s*<(?:p|h3|h1)[^>]*><span[^>]*>)(.*?)(<\/span><\/(?:p|h3|h1)>)/gi;
+          firstEntryTemplate = firstEntryTemplate.replace(pubDetailsPattern, (match, openTags, content, closeTags) => {
+
+            if (content.includes('<strong>')) {
+              return match;
+            }
+            
+
+            const cleanContent = extractTextContent(content);
+            
+
+            const details = firstPub.description || firstPub.publisher || firstPub.date || '';
+            if (details) {
+              const cleanDetails = details.replace(/\s+/g, ' ').trim();
+
+              if (cleanContent === cleanDetails || cleanContent.includes(cleanDetails) || cleanDetails.includes(cleanContent)) {
+                return openTags + '[PUBLICATION DETAILS]' + closeTags;
+              }
+            }
             return match;
+          });
+          
+
+          if (firstPub.description || firstPub.publisher || firstPub.date) {
+            const details = firstPub.description || firstPub.publisher || firstPub.date || '';
+            if (details && !firstEntryTemplate.includes('[PUBLICATION DETAILS]')) {
+              firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, details, '[PUBLICATION DETAILS]');
+            }
           }
-          return ''; 
-        });
-        
-        template = template.replace(/\n{3,}/g, '\n\n');
+          
+
+          if (publicationEntries.length > 1) {
+            let isFirst = true;
+            const newPublicationsContent = publicationsContent.replace(publicationEntryPattern, (match) => {
+              if (isFirst) {
+                isFirst = false;
+                return firstEntryTemplate;
+              }
+              return '';
+            });
+            
+            template = template.replace(publicationsSectionPattern, (match, header) => {
+              return header + newPublicationsContent;
+            });
+          } else {
+            template = template.replace(publicationsSectionPattern, (match, header) => {
+              return header + firstEntryTemplate;
+            });
+          }
+        }
       }
     }
     
     
-    if (userDetails.certifications) {
-      const seenValues = new Set<string>();
-      userDetails.certifications.forEach((cert: any) => {
-        const name = cert.name || cert.certification_name || '';
-        if (name && !seenValues.has(name)) {
-          template = template.replace(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[CERTIFICATION NAME]');
-          seenValues.add(name);
+    if (userDetails.certifications && userDetails.certifications.length > 0) {
+      const firstCert = userDetails.certifications[0];
+      const certName = firstCert.name || firstCert.certification_name || '';
+      
+      const certificationsSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>CERTIFICATIONS<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>CERTIFICATIONS<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|ACHIEVEMENTS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+      const certificationsSectionMatch = template.match(certificationsSectionPattern);
+      
+      if (certificationsSectionMatch) {
+        const certificationsContent = certificationsSectionMatch[2];
+        
+
+        const certificationEntryPattern = new RegExp(
+          `(<(?:${allowedTags.join('|')})[^>]*><span[^>]*>.*?<\/span><\/(?:${allowedTags.join('|')})>)`,
+          'gi'
+        );
+        const certificationEntries = certificationsContent.match(certificationEntryPattern);
+        
+        if (certificationEntries && certificationEntries.length > 0) {
+          let firstEntryTemplate = certificationEntries[0];
+          
+
+          if (certName) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, certName, '[CERTIFICATION NAME]');
+          }
+          
+
+          if (certificationEntries.length > 1) {
+            let isFirst = true;
+            const newCertificationsContent = certificationsContent.replace(certificationEntryPattern, (match) => {
+              if (isFirst) {
+                isFirst = false;
+                return firstEntryTemplate;
+              }
+              return '';
+            });
+            
+            template = template.replace(certificationsSectionPattern, (match, header) => {
+              return header + newCertificationsContent;
+            });
+          } else {
+            template = template.replace(certificationsSectionPattern, (match, header) => {
+              return header + firstEntryTemplate;
+            });
+          }
         }
-      });
+      } else {
+
+        const seenValues = new Set<string>();
+        userDetails.certifications.forEach((cert: any) => {
+          const name = cert.name || cert.certification_name || '';
+          if (name && !seenValues.has(name)) {
+            template = replaceValueInAllowedTags(template, name, '[CERTIFICATION NAME]');
+            seenValues.add(name);
+          }
+        });
+      }
     }
     
     
-    if (userDetails.achievements) {
-      const seenValues = new Set<string>();
-      userDetails.achievements.forEach((ach: any) => {
-        const description = ach.description || '';
-        if (description && !seenValues.has(description)) {
-          template = template.replace(new RegExp(description.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[ACHIEVEMENT DESCRIPTION]');
-          seenValues.add(description);
+    if (userDetails.achievements && userDetails.achievements.length > 0) {
+      const firstAch = userDetails.achievements[0];
+      
+      const achievementsSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>ACHIEVEMENTS<\/strong><\/span><\/p><hr[^>]*>|<p[^>]*><span[^>]*><strong>ACHIEVEMENTS<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS)<\/strong>|<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>(?:SUMMARY|EXPERIENCE|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS)<\/strong>|$)/i;
+      const achievementsSectionMatch = template.match(achievementsSectionPattern);
+      
+      if (achievementsSectionMatch) {
+        const achievementsContent = achievementsSectionMatch[2];
+        
+
+        const achievementEntryPattern = new RegExp(
+          `(<(?:${allowedTags.join('|')})[^>]*><span[^>]*>.*?<\/span><\/(?:${allowedTags.join('|')})>)`,
+          'gi'
+        );
+        const achievementEntries = achievementsContent.match(achievementEntryPattern);
+        
+        if (achievementEntries && achievementEntries.length > 0) {
+          let firstEntryTemplate = achievementEntries[0];
+          
+
+          if (firstAch.description) {
+            firstEntryTemplate = replaceValueInAllowedTags(firstEntryTemplate, firstAch.description, '[ACHIEVEMENT DESCRIPTION]');
+          }
+          
+
+          if (achievementEntries.length > 1) {
+            let isFirst = true;
+            const newAchievementsContent = achievementsContent.replace(achievementEntryPattern, (match) => {
+              if (isFirst) {
+                isFirst = false;
+                return firstEntryTemplate;
+              }
+              return '';
+            });
+            
+            template = template.replace(achievementsSectionPattern, (match, header) => {
+              return header + newAchievementsContent;
+            });
+          } else {
+            template = template.replace(achievementsSectionPattern, (match, header) => {
+              return header + firstEntryTemplate;
+            });
+          }
         }
-      });
+      }
+    }
+    
+
+
+    const finalCity = profile.city || '';
+    
+
+    if (finalCity) {
+      const cityEscaped = finalCity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      template = template.replace(
+        new RegExp(`(<p[^>]*>.*?<span[^>]*>)${cityEscaped}(\\s*\\|\\s*\\[PHONE\\]\\s*\\|\\s*\\[EMAIL\\].*?</span>.*?</p>)`, 'gi'),
+        '$1[CITY]$2'
+      );
+
+      template = template.replace(
+        new RegExp(`(<p[^>]*>.*?<span[^>]*>)${cityEscaped}(\\s*\\|.*?</span>.*?</p>)`, 'gi'),
+        '$1[CITY]$2'
+      );
+    }
+    
+
+    if (userDetails.experiences && userDetails.experiences.length > 0) {
+      const firstExp = userDetails.experiences[0];
+      if (firstExp.description) {
+
+        const expSectionPattern = /(<p[^>]*data-spacing-after[^>]*><span[^>]*><strong>EXPERIENCE<\/strong><\/span><\/p><hr[^>]*>)([\s\S]*?)(?=<p[^>]*><span[^>]*><strong>(?:SUMMARY|PROJECTS|SKILLS|EDUCATION|PUBLICATIONS|CERTIFICATIONS|ACHIEVEMENTS)<\/strong>|$)/i;
+        template = template.replace(expSectionPattern, (match, header, content) => {
+
+
+          let updatedContent = content;
+          
+
+          updatedContent = updatedContent.replace(
+            /(<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)([\s\S]*?)(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>)/gi,
+            (match: string, openTags: string, spanContent: string, closeTags: string) => {
+
+              if (!spanContent.includes('[DESCRIPTION]')) {
+                return openTags + '[DESCRIPTION]' + closeTags;
+              }
+              return match;
+            }
+          );
+          
+          return header + updatedContent;
+        });
+      }
     }
     
     return template;
@@ -1138,8 +1831,69 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
       const data = await response.json();
       setError(null);
       toast.success('Template saved successfully!');
+      
+
+      const userDetailsResponse = await fetch(`/api/user-details/${user.id}`);
+      if (userDetailsResponse.ok) {
+        const userData = await userDetailsResponse.json();
+        setUserDetails(userData);
+        
+
+        const profile = userData.userProfile || {};
+        const template = profile.resume_template;
+        
+        if (template) {
+          setSavedTemplate(template);
+          
+
+          let contentWithData = replacePlaceholdersWithData(template, userData);
+          contentWithData = formatDatesInContent(contentWithData);
+          setResumeContent(contentWithData);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save template");
+    }
+  };
+
+  const handleRestoreDefaultTemplate = async () => {
+    if (!user?.id) {
+      setError("User not authenticated");
+      return;
+    }
+
+    try {
+      setError(null);
+      
+      const response = await fetch('/api/restore-default-template', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setError(null);
+      toast.success('Default template restored successfully!');
+      
+
+      const userDetailsResponse = await fetch(`/api/user-details/${user.id}`);
+      if (userDetailsResponse.ok) {
+        const userData = await userDetailsResponse.json();
+        setUserDetails(userData);
+        setSavedTemplate(null);
+
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to restore default template");
     }
   };
 
@@ -1245,6 +1999,7 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
                 onContentChange={(content) => setResumeContent(content)}
                 onImportHTML={handleImportHTML}
                 onSaveTemplate={handleSaveTemplate}
+                onRestoreDefaultTemplate={handleRestoreDefaultTemplate}
               />
             </div>
           </CardContent>
