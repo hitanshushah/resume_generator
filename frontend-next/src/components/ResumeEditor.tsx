@@ -195,10 +195,42 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
         h3 { font-size: 18px; font-weight: bold; margin-top: 16px; margin-bottom: 6px; }
         p { margin-bottom: 10px; }
         ul, ol { margin-left: 20px; margin-bottom: 10px; }
+        li { 
+          margin-bottom: 0; 
+          margin-top: 0;
+        }
+        li p { 
+          margin-bottom: 0; 
+          margin-top: 0;
+        }
+        li p[data-spacing-after="0"], 
+        li p[style*="margin-bottom: 0px"],
+        li p[style*="margin-bottom:0px"],
+        li p[data-spacing-after="0"][style*="margin-bottom: 0px"],
+        li p[data-spacing-after="0"][style*="margin-bottom:0px"] {
+          margin-bottom: 0 !important;
+          margin-top: 0 !important;
+        }
         @media print {
           body {
             padding: 0;
             margin: 0;
+          }
+          li { 
+            margin-bottom: 0 !important; 
+            margin-top: 0 !important;
+          }
+          li p { 
+            margin-bottom: 0 !important; 
+            margin-top: 0 !important;
+          }
+          li p[data-spacing-after="0"], 
+          li p[style*="margin-bottom: 0px"],
+          li p[style*="margin-bottom:0px"],
+          li p[data-spacing-after="0"][style*="margin-bottom: 0px"],
+          li p[data-spacing-after="0"][style*="margin-bottom:0px"] {
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
           }
         }
       </style>
