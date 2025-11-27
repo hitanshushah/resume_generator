@@ -1315,6 +1315,26 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
             if (!firstEntryTemplate.includes('[DESCRIPTION]')) {
               firstEntryTemplate = firstEntryTemplate.replace(/(<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)[\s\S]*?(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>)/gi, '$1[DESCRIPTION]$2');
             }
+            
+            firstEntryTemplate = firstEntryTemplate.replace(/(<ul>)([\s\S]*?)(<\/ul>)/gi, (match, openUl, ulContent, closeUl) => {
+              const liPattern = /(<li>[\s\S]*?<\/li>)/gi;
+              const listItems = ulContent.match(liPattern) || [];
+              
+              if (listItems.length > 0) {
+                let firstLi = listItems[0];
+                
+                if (!firstLi.includes('[DESCRIPTION]')) {
+                  firstLi = firstLi.replace(/(<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)([\s\S]*?)(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>)/gi, 
+                    (liMatch: string, openTags: string, content: string, closeTags: string) => {
+                      return openTags + '[DESCRIPTION]' + closeTags;
+                    });
+                }
+                
+                return openUl + firstLi + closeUl;
+              }
+              
+              return match;
+            });
           }
           
 
@@ -1392,6 +1412,27 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
 
             const descPattern = /(<ul>[\s\S]*?<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)([\s\S]*?)(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>[\s\S]*?<\/ul>)/gi;
             firstEntryTemplate = replaceValueInNestedStructures(firstEntryTemplate, firstProj.description, '[DESCRIPTION]', descPattern);
+            
+            firstEntryTemplate = firstEntryTemplate.replace(/(<ul>)([\s\S]*?)(<\/ul>)/gi, (match, openUl, ulContent, closeUl) => {
+
+              const liPattern = /(<li>[\s\S]*?<\/li>)/gi;
+              const listItems = ulContent.match(liPattern) || [];
+              
+              if (listItems.length > 0) {
+                let firstLi = listItems[0];
+                
+                if (!firstLi.includes('[DESCRIPTION]')) {
+                  firstLi = firstLi.replace(/(<li>[\s\S]*?<p[^>]*>[\s\S]*?<span[^>]*>)([\s\S]*?)(<\/span>[\s\S]*?<\/p>[\s\S]*?<\/li>)/gi, 
+                    (liMatch: string, openTags: string, content: string, closeTags: string) => {
+                      return openTags + '[DESCRIPTION]' + closeTags;
+                    });
+                }
+                
+                return openUl + firstLi + closeUl;
+              }
+              
+              return match;
+            });
           }
           
 
