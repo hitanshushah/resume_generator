@@ -324,59 +324,76 @@ REQUIREMENTS:
 - Output ONLY the summary text, no headings or extra formatting"""
     })
     
-    # Section 2: Experiences - Only generate descriptions
+    # Section 2: Experiences - Process one by one
     if user_details.get('experiences'):
         experiences = user_details.get('experiences', [])
-        sections.append({
-            'section': 'experiences',
-            'title': 'Work Experience',
-            'data': {'experiences': experiences},
-            'prompt': f"""IMPORTANT: Generate ONLY descriptions for each work experience. Do NOT include company names, job titles, locations, dates, or technologies.
+        # Create a separate section for each experience
+        for idx, experience in enumerate(experiences):
+            company_name = experience.get('company_name', '')
+            role = experience.get('role', '')
+            original_description = experience.get('description', '')
+            
+            sections.append({
+                'section': 'experience',
+                'title': f'Work Experience {idx + 1}',
+                'data': {
+                    'experience': experience,
+                    'index': idx,
+                    'company_name': company_name
+                },
+                'prompt': f"""IMPORTANT: Generate ONLY the description for this work experience. Do NOT include company name, job title, location, dates, or technologies.
 
 Job Description:
 {job_description}
 
-User's Actual Work Experiences (generate descriptions for each):
-{json.dumps(experiences, indent=2)}
+Work Experience Details:
+Company: {company_name}
+Role: {role}
+Original Description: {original_description}
 
-Task: Generate professional descriptions for each work experience that align with the job description.
+Task: Generate a professional description for this work experience that aligns with the job description.
 
 REQUIREMENTS:
-- Generate descriptions for ALL {len(experiences)} experiences in the same order as provided
-- Each description should be formatted as HTML bullet points using <ul><li> tags
+- Maintain similar level of detail as the original description
 - Use keywords and terminology from the job description
-- Maintain similar level of detail as the original descriptions
-- Do NOT include company names, job titles, locations, dates, or technologies
+- Generate response in new lines with one point per line
+- Each point should be NOT more than 2 lines (not in one paragraph)
+- Format: Each point on a new line, where each point is maximum 2 lines long
+- Do NOT include company name, job title, location, dates, or technologies
 - Do NOT create or invent any experiences
-- Output format: Return descriptions separated by a clear delimiter "---EXPERIENCE_SEPARATOR---" between each experience
-- Each description should be in HTML format: <ul><li><p>Description point 1</p></li><li><p>Description point 2</p></li></ul>
-
-Example output format:
-<ul><li><p>First bullet point for experience 1</p></li><li><p>Second bullet point for experience 1</p></li></ul>
----EXPERIENCE_SEPARATOR---
-<ul><li><p>First bullet point for experience 2</p></li><li><p>Second bullet point for experience 2</p></li></ul>"""
-        })
+- Do NOT create or invent any information not in the original description
+- Output ONLY the description points, one per line, nothing else"""
+            })
     
-    # Section 3: Projects
+    # Section 3: Projects - Process one by one
     if user_details.get('projects'):
-        sections.append({
-            'section': 'projects',
-            'title': 'Projects',
-            'data': {'projects': user_details.get('projects', [])},
-            'prompt': f"""CRITICAL: Use ONLY the user's actual projects provided below. Do NOT create, invent, or generate any new projects.
+        projects = user_details.get('projects', [])
+        # Create a separate section for each project
+        for idx, project in enumerate(projects):
+            project_name = project.get('name', '')
+            original_description = project.get('description', '')
+            
+            sections.append({
+                'section': 'project',
+                'title': f'Project {idx + 1}',
+                'data': {
+                    'project': project,
+                    'index': idx,
+                    'project_name': project_name
+                },
+                'prompt': f"""CRITICAL: Generate ONLY the description for this project. Do NOT include project name, technologies, links, or dates.
 
 Job Description:
 {job_description}
 
-User's Actual Projects (USE ONLY THESE - DO NOT CREATE NEW ONES):
-{json.dumps(user_details.get('projects', []), indent=2)}
+Project Details:
+Name: {project_name}
+Original Description: {original_description}
 
-Task: Create the projects section using ONLY the user's actual projects listed above.
-
-PRIMARY FOCUS: Change keywords, technologies, and wordings to match the job description while keeping the same structure and size.
+Task: Generate a professional description for this project that aligns with the job description.
 
 REQUIREMENTS:
-- Keep the SAME number of projects as in the user data (include all projects)
+- Maintain similar level of detail as the original description
 - Keep the SAME structure, format, and length for each project entry
 - Keep the EXACT project names, dates, categories, and links unchanged
 - ONLY modify:
@@ -387,9 +404,13 @@ REQUIREMENTS:
 - Use what the user data has stored - just change words, tech, and keywords to match job description
 - Do NOT add or remove projects
 - Do NOT change the structure or format
-- DO NOT create, invent, or generate any projects that are not in the user's actual project list above
-- Format the output as HTML with proper structure for each project entry"""
-        })
+- Do NOT create, invent, or generate any projects that are not in the user's actual project list
+- Generate response in new lines with one point per line
+- Each point should be NOT more than 2 lines (not in one paragraph)
+- Format: Each point on a new line, where each point is maximum 2 lines long
+- Do NOT include project name, technologies, links, or dates
+- Output ONLY the description points, one per line, nothing else"""
+            })
     
     return sections
 

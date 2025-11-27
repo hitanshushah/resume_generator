@@ -8,10 +8,16 @@ import { useUser } from "@/contexts/UserContext";
 import { Progress } from "@/components/ui/progress";
 import { ResumeEditor } from "@/components/ResumeEditor";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 interface SectionData {
   title: string;
   content: string;
+  section?: string;
+  company_name?: string;
+  project_name?: string;
+  index?: number;
 }
 
 
@@ -59,6 +65,7 @@ export default function Home() {
   const [userDetails, setUserDetails] = useState<any>(null);
   const [savedTemplate, setSavedTemplate] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [isResponsesOpen, setIsResponsesOpen] = useState(false);
 
   
   const formatDate = (dateString: string | null | undefined): string => {
@@ -923,6 +930,26 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
     }
   }, [userDetails, savedTemplate, sections]);
 
+  // Helper function to convert newline-separated points to HTML bullet points
+  const convertToHtmlBullets = (text: string): string => {
+    if (!text) return '';
+    
+    // Split by newlines and filter out empty lines
+    const points = text.split('\n').filter(line => line.trim().length > 0);
+    
+    if (points.length === 0) return '';
+    
+    // Convert each point to a list item
+    const listItems = points.map(point => {
+      const trimmedPoint = point.trim();
+      // Remove any leading bullet characters or dashes
+      const cleanPoint = trimmedPoint.replace(/^[●•\-\*]\s*/, '');
+      return `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${cleanPoint}</span></p></li>`;
+    }).join('');
+    
+    return `<ul>${listItems}</ul>`;
+  };
+
   const generateResume = async () => {
     if (!prompt.trim() || !jobDescription.trim()) {
       setError("Please fill in both prompt and job description");
@@ -991,11 +1018,20 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
                   message: data.message || "",
                 });
               } else if (data.type === "section") {
+                // Store section with metadata
+                const sectionKey = data.section === 'experience' || data.section === 'project' 
+                  ? `${data.section}_${data.index || 0}`
+                  : data.section;
+                
                 setSections((prev) => ({
                   ...prev,
-                  [data.section]: {
+                  [sectionKey]: {
                     title: data.title,
                     content: data.content,
+                    section: data.section,
+                    company_name: data.company_name,
+                    project_name: data.project_name,
+                    index: data.index,
                   },
                 }));
                 setProgress({
@@ -2021,6 +2057,51 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
                   Failed to generate resume please try again.
                 </div>
               </div>
+            )}
+
+            {/* Collapsible Responses Section */}
+            {Object.keys(sections).length > 0 && (
+              <Collapsible open={isResponsesOpen} onOpenChange={setIsResponsesOpen} className="mt-4">
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between dark:bg-[#303030] dark:text-white"
+                  >
+                    <span>View All Generated Responses ({Object.keys(sections).length})</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isResponsesOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2 space-y-4">
+                  <div className="p-4 rounded-lg border bg-[#F9F9F9] dark:bg-[#303030] dark:border-zinc-700 space-y-4 max-h-[600px] overflow-y-auto">
+                    {Object.entries(sections).map(([key, section]) => (
+                      <div key={key} className="border-b dark:border-zinc-700 pb-4 last:border-b-0 last:pb-0">
+                        <div className="font-semibold text-sm mb-2 text-zinc-700 dark:text-zinc-300">
+                          {section.title}
+                          {section.company_name && (
+                            <span className="text-zinc-500 dark:text-zinc-400 ml-2">
+                              ({section.company_name})
+                            </span>
+                          )}
+                          {section.project_name && (
+                            <span className="text-zinc-500 dark:text-zinc-400 ml-2">
+                              ({section.project_name})
+                            </span>
+                          )}
+                        </div>
+                        <div 
+                          className="text-sm text-zinc-600 dark:text-zinc-400 prose prose-sm dark:prose-invert max-w-none whitespace-pre-line"
+                        >
+                          {section.section === 'summary' ? (
+                            <p>{section.content}</p>
+                          ) : (
+                            <div dangerouslySetInnerHTML={{ __html: convertToHtmlBullets(section.content) }} />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             )}
 
             {/* Resume Editor - Shows template by default, updates when sections are generated */}

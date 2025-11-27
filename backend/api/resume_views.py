@@ -4,6 +4,7 @@ from rest_framework import status
 from django.http import StreamingHttpResponse
 import os
 import json
+import time
 from .helpers import get_user_details_data, prepare_resume_sections, send_to_ollama
 
 
@@ -44,12 +45,12 @@ def generate_resume_stream(request):
             yield f"data: {json.dumps({'error': f'User with id {user_id_int} does not exist or has no data.', 'type': 'error'})}\n\n"
             return
 
-        # Step 1: Send job description acknowledgment
-        yield f"data: {json.dumps({'type': 'progress', 'total': 3, 'current': 0, 'message': 'Job description received. Starting resume generation...'})}\n\n"
-        
-        # Prepare sections (now only 3: summary, experiences, projects)
+        # Prepare sections (summary + individual experiences + individual projects)
         sections = prepare_resume_sections(user_details, prompt, job_description)
         total_sections = len(sections)
+        
+        # Step 1: Send job description acknowledgment
+        yield f"data: {json.dumps({'type': 'progress', 'total': total_sections, 'current': 0, 'message': 'Job description received. Starting resume generation...'})}\n\n"
         
         accumulated_response = {}
         
@@ -58,12 +59,13 @@ def generate_resume_stream(request):
             section_name = section_info['section']
             section_title = section_info['title']
             section_prompt = section_info['prompt']
+            section_data = section_info.get('data', {})
             
             try:
                 # Send progress update
-                yield f"data: {json.dumps({'type': 'progress', 'total': 3, 'current': index, 'section': section_name, 'title': section_title, 'message': f'Generating {section_title}...'})}\n\n"
+                yield f"data: {json.dumps({'type': 'progress', 'total': total_sections, 'current': index, 'section': section_name, 'title': section_title, 'message': f'Generating {section_title}...'})}\n\n"
                 
-                # Send section to Ollama
+                Send section to Ollama
                 section_response = send_to_ollama(
                     section_prompt,
                     ollama_host,
@@ -71,25 +73,52 @@ def generate_resume_stream(request):
                     ollama_model,
                     stream=False
                 )
-                
-                # Store the response
-                accumulated_response[section_name] = {
+                            
+                # Prepare response data with metadata
+                response_data = {
+                    'type': 'section',
+                    'section': section_name,
                     'title': section_title,
-                    'content': section_response
+                    'content': section_response,
+                    'progress': {'total': total_sections, 'current': index}
                 }
                 
+                # Add metadata for experiences and projects
+                if section_name == 'experience':
+                    response_data['company_name'] = section_data.get('company_name', '')
+                    response_data['index'] = section_data.get('index', 0)
+                elif section_name == 'project':
+                    response_data['project_name'] = section_data.get('project_name', '')
+                    response_data['index'] = section_data.get('index', 0)
+                
+                # Store the response
+                if section_name in ['experience', 'project']:
+                    # For experiences and projects, store by index
+                    key = f"{section_name}_{section_data.get('index', 0)}"
+                    accumulated_response[key] = {
+                        'title': section_title,
+                        'content': section_response,
+                        'company_name': section_data.get('company_name', '') if section_name == 'experience' else None,
+                        'project_name': section_data.get('project_name', '') if section_name == 'project' else None,
+                    }
+                else:
+                    accumulated_response[section_name] = {
+                        'title': section_title,
+                        'content': section_response
+                    }
+                
                 # Send section response to frontend immediately
-                yield f"data: {json.dumps({'type': 'section', 'section': section_name, 'title': section_title, 'content': section_response, 'progress': {'total': 3, 'current': index}})}\n\n"
+                yield f"data: {json.dumps(response_data)}\n\n"
                 
             except Exception as e:
                 # If a section fails, send error but continue with next sections
                 error_msg = f'Error generating {section_title}: {str(e)}'
-                yield f"data: {json.dumps({'type': 'section_error', 'section': section_name, 'title': section_title, 'error': error_msg, 'progress': {'total': 3, 'current': index}})}\n\n"
+                yield f"data: {json.dumps({'type': 'section_error', 'section': section_name, 'title': section_title, 'error': error_msg, 'progress': {'total': total_sections, 'current': index}})}\n\n"
                 # Continue with next section even if this one failed
                 continue
         
         # Send completion message
-        yield f"data: {json.dumps({'type': 'complete', 'total': 3, 'message': 'Resume generation completed', 'sections': list(accumulated_response.keys())})}\n\n"
+        yield f"data: {json.dumps({'type': 'complete', 'total': total_sections, 'message': 'Resume generation completed', 'sections': list(accumulated_response.keys())})}\n\n"
         
     except Exception as e:
         yield f"data: {json.dumps({'type': 'error', 'error': f'Internal server error: {str(e)}'})}\n\n"
