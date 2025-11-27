@@ -65,7 +65,7 @@ def generate_resume_stream(request):
                 # Send progress update
                 yield f"data: {json.dumps({'type': 'progress', 'total': total_sections, 'current': index, 'section': section_name, 'title': section_title, 'message': f'Generating {section_title}...'})}\n\n"
                 
-                Send section to Ollama
+                # Send section to Ollama
                 section_response = send_to_ollama(
                     section_prompt,
                     ollama_host,
