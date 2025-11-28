@@ -15,6 +15,14 @@ declare module "@tiptap/core" {
        * Set paragraph spacing after
        */
       setParagraphSpacingAfter: (spacing: string | null) => ReturnType;
+      /**
+       * Set heading spacing before
+       */
+      setHeadingSpacingBefore: (spacing: string | null) => ReturnType;
+      /**
+       * Set heading spacing after
+       */
+      setHeadingSpacingAfter: (spacing: string | null) => ReturnType;
     };
   }
 }
@@ -41,6 +49,45 @@ export const ParagraphSpacing = Extension.create({
               };
             },
           },
+          spacingBefore: {
+            default: null,
+            parseHTML: (element) => element.getAttribute("data-spacing-before") || null,
+            renderHTML: (attributes) => {
+              if (!attributes.spacingBefore) {
+                return {};
+              }
+              const styles: string[] = [];
+              if (attributes.spacingBefore) {
+                styles.push(`margin-top: ${attributes.spacingBefore}`);
+              }
+              return {
+                "data-spacing-before": attributes.spacingBefore,
+                style: styles.join("; "),
+              };
+            },
+          },
+          spacingAfter: {
+            default: null,
+            parseHTML: (element) => element.getAttribute("data-spacing-after") || null,
+            renderHTML: (attributes) => {
+              if (!attributes.spacingAfter) {
+                return {};
+              }
+              const styles: string[] = [];
+              if (attributes.spacingAfter) {
+                styles.push(`margin-bottom: ${attributes.spacingAfter}`);
+              }
+              return {
+                "data-spacing-after": attributes.spacingAfter,
+                style: styles.join("; "),
+              };
+            },
+          },
+        },
+      },
+      {
+        types: ["heading"],
+        attributes: {
           spacingBefore: {
             default: null,
             parseHTML: (element) => element.getAttribute("data-spacing-before") || null,
@@ -158,6 +205,58 @@ export const ParagraphSpacing = Extension.create({
           
           return chain()
             .updateAttributes("paragraph", { spacingAfter: spacing })
+            .run();
+        },
+      setHeadingSpacingBefore:
+        (spacing: string | null) =>
+        ({ chain, state, dispatch, tr }) => {
+          const { selection } = state;
+          const { $from } = selection;
+          
+          
+          const heading = $from.parent;
+          if (heading.type.name === "heading") {
+            const pos = $from.before($from.depth);
+            const newAttrs = {
+              ...heading.attrs,
+              spacingBefore: spacing,
+            };
+            
+            if (dispatch) {
+              tr.setNodeMarkup(pos, null, newAttrs);
+              dispatch(tr);
+            }
+            return true;
+          }
+          
+          return chain()
+            .updateAttributes("heading", { spacingBefore: spacing })
+            .run();
+        },
+      setHeadingSpacingAfter:
+        (spacing: string | null) =>
+        ({ chain, state, dispatch, tr }) => {
+          const { selection } = state;
+          const { $from } = selection;
+          
+          
+          const heading = $from.parent;
+          if (heading.type.name === "heading") {
+            const pos = $from.before($from.depth);
+            const newAttrs = {
+              ...heading.attrs,
+              spacingAfter: spacing,
+            };
+            
+            if (dispatch) {
+              tr.setNodeMarkup(pos, null, newAttrs);
+              dispatch(tr);
+            }
+            return true;
+          }
+          
+          return chain()
+            .updateAttributes("heading", { spacingAfter: spacing })
             .run();
         },
     };

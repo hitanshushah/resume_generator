@@ -13,6 +13,7 @@ import { FontFamily } from "@/lib/fontFamily";
 import { CustomHorizontalRule } from "@/lib/horizontalRule";
 import { ParagraphSpacing } from "@/lib/paragraphSpacing";
 import { LineHeight } from "@/lib/lineHeight";
+import { NonBreakingSpace } from "@/lib/nonBreakingSpace";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -90,6 +91,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
       CustomHorizontalRule,
       ParagraphSpacing,
       LineHeight,
+      NonBreakingSpace,
     ],
     content: content,
     immediatelyRender: false,
@@ -109,7 +111,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[500px] p-4 dark:prose-invert max-w-5xl",
+        class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[500px] p-5 dark:prose-invert max-w-[800px]",
       },
       handleScrollToSelection: (view) => {
         
@@ -180,9 +182,14 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
   }
 
   
-  const createFullHTML = (html: string) => {
+const createFullHTML = (html: string) => {
     const css = `
       <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
         body {
           font-family: Arial, sans-serif;
           max-width: 800px;
@@ -190,32 +197,55 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
           padding: 20px;
           line-height: 1.6;
         }
-        h1 { font-size: 24px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
-        h2 { font-size: 20px; font-weight: bold; margin-top: 18px; margin-bottom: 8px; }
-        h3 { font-size: 18px; font-weight: bold; margin-top: 16px; margin-bottom: 6px; }
-        p { margin-bottom: 10px; }
-        ul, ol { margin-left: 20px; margin-bottom: 10px; }
+        h1 { font-size: 24px; font-weight: bold; }
+        h2 { font-size: 20px; font-weight: bold; }
+        h3 { font-size: 18px; font-weight: bold; }
+        
+        /* Default margins for headings without spacing attributes */
+        h1:not([data-spacing-before]):not([data-spacing-after]) { margin-top: 20px; margin-bottom: 10px; }
+        h2:not([data-spacing-before]):not([data-spacing-after]) { margin-top: 18px; margin-bottom: 8px; }
+        h3:not([data-spacing-before]):not([data-spacing-after]) { margin-top: 16px; margin-bottom: 6px; }
+        p { margin-bottom: 10px !important; }
+        ul, ol { margin-left: 20px !important; margin-bottom: 10px !important; }
         li { 
-          margin-bottom: 0; 
-          margin-top: 0;
-        }
-        li p { 
-          margin-bottom: 0; 
-          margin-top: 0;
-        }
-        li p[data-spacing-after="0"], 
-        li p[style*="margin-bottom: 0px"],
-        li p[style*="margin-bottom:0px"],
-        li p[data-spacing-after="0"][style*="margin-bottom: 0px"],
-        li p[data-spacing-after="0"][style*="margin-bottom:0px"] {
-          margin-bottom: 0 !important;
+          margin-bottom: 0 !important; 
           margin-top: 0 !important;
         }
+        li p { 
+          margin-bottom: 0 !important; 
+          margin-top: 0 !important;
+        }
+        
+        /* Override inline styles for spacing-after="0" on paragraphs */
+        p[data-spacing-after="0"] {
+          margin-bottom: 0 !important;
+        }
+        
+        p[data-spacing-before="0"] {
+          margin-top: 0 !important;
+        }
+        
+        /* Inline styles from data attributes are applied via renderHTML in the extension */
+        
         @media print {
-          body {
-            padding: 0;
+          * {
             margin: 0;
+            padding: 0;
           }
+          body {
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          h1 { font-size: 24px; font-weight: bold; }
+          h2 { font-size: 20px; font-weight: bold; }
+          h3 { font-size: 18px; font-weight: bold; }
+          
+          /* Default margins for headings without spacing attributes */
+          h1:not([data-spacing-before]):not([data-spacing-after]) { margin-top: 20px; margin-bottom: 10px; }
+          h2:not([data-spacing-before]):not([data-spacing-after]) { margin-top: 18px; margin-bottom: 8px; }
+          h3:not([data-spacing-before]):not([data-spacing-after]) { margin-top: 16px; margin-bottom: 6px; }
+          p { margin-bottom: 10px !important; }
+          ul, ol { margin-left: 20px !important; margin-bottom: 10px !important; }
           li { 
             margin-bottom: 0 !important; 
             margin-top: 0 !important;
@@ -224,14 +254,17 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
             margin-bottom: 0 !important; 
             margin-top: 0 !important;
           }
-          li p[data-spacing-after="0"], 
-          li p[style*="margin-bottom: 0px"],
-          li p[style*="margin-bottom:0px"],
-          li p[data-spacing-after="0"][style*="margin-bottom: 0px"],
-          li p[data-spacing-after="0"][style*="margin-bottom:0px"] {
+          
+          /* Override inline styles for spacing-after="0" on paragraphs */
+          p[data-spacing-after="0"] {
             margin-bottom: 0 !important;
+          }
+          
+          p[data-spacing-before="0"] {
             margin-top: 0 !important;
           }
+          
+          /* Inline styles from data attributes are applied via renderHTML in the extension */
         }
       </style>
     `;
@@ -799,7 +832,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
               </Popover>
             </div>
 
-            {/* Paragraph Spacing Before */}
+            {/* Paragraph/Heading Spacing Before */}
             <div className="flex gap-1 border-r pr-2 items-center">
               <select
                 value={(() => {
@@ -807,18 +840,30 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
                   const { state } = editor;
                   const { selection } = state;
                   const { $from } = selection;
-                  const paragraph = $from.parent;
-                  if (paragraph.type.name === "paragraph" && paragraph.attrs.spacingBefore) {
-                    return paragraph.attrs.spacingBefore;
+                  const node = $from.parent;
+                  if (node.type.name === "paragraph" && node.attrs.spacingBefore) {
+                    return node.attrs.spacingBefore;
+                  }
+                  if (node.type.name === "heading" && node.attrs.spacingBefore) {
+                    return node.attrs.spacingBefore;
                   }
                   return "default";
                 })()}
                 onChange={(e) => {
                   const spacingBefore = e.target.value === "default" ? null : e.target.value;
-                  editor.chain().focus().setParagraphSpacingBefore(spacingBefore).run();
+                  if (!editor) return;
+                  const { state } = editor;
+                  const { selection } = state;
+                  const { $from } = selection;
+                  const node = $from.parent;
+                  if (node.type.name === "heading") {
+                    editor.chain().focus().setHeadingSpacingBefore(spacingBefore).run();
+                  } else {
+                    editor.chain().focus().setParagraphSpacingBefore(spacingBefore).run();
+                  }
                 }}
                 className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
-                title="Paragraph Spacing Before"
+                title="Spacing Before"
               >
                 <option value="default">Spacing Before</option>
                 <option value="0">0px</option>
@@ -836,13 +881,13 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-3 text-sm">
-                  <p className="font-medium mb-1">Paragraph Spacing Before</p>
-                  <p className="text-zinc-600 dark:text-zinc-400">Control the space above the paragraph. Higher values create more space before the paragraph.</p>
+                  <p className="font-medium mb-1">Spacing Before</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Control the space above the paragraph or heading. Higher values create more space before the element.</p>
                 </PopoverContent>
               </Popover>
             </div>
 
-            {/* Paragraph Spacing After */}
+            {/* Paragraph/Heading Spacing After */}
             <div className="flex gap-1 items-center">
               <select
                 value={(() => {
@@ -850,22 +895,35 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
                   const { state } = editor;
                   const { selection } = state;
                   const { $from } = selection;
-                  const paragraph = $from.parent;
-                  if (paragraph.type.name === "paragraph" && paragraph.attrs.spacingAfter) {
-                    return paragraph.attrs.spacingAfter;
+                  const node = $from.parent;
+                  if (node.type.name === "paragraph" && node.attrs.spacingAfter) {
+                    return node.attrs.spacingAfter;
                   }
                   
-                  if (paragraph.type.name === "paragraph" && paragraph.attrs.spacing) {
-                    return paragraph.attrs.spacing;
+                  if (node.type.name === "paragraph" && node.attrs.spacing) {
+                    return node.attrs.spacing;
+                  }
+                  
+                  if (node.type.name === "heading" && node.attrs.spacingAfter) {
+                    return node.attrs.spacingAfter;
                   }
                   return "default";
                 })()}
                 onChange={(e) => {
                   const spacingAfter = e.target.value === "default" ? null : e.target.value;
-                  editor.chain().focus().setParagraphSpacingAfter(spacingAfter).run();
+                  if (!editor) return;
+                  const { state } = editor;
+                  const { selection } = state;
+                  const { $from } = selection;
+                  const node = $from.parent;
+                  if (node.type.name === "heading") {
+                    editor.chain().focus().setHeadingSpacingAfter(spacingAfter).run();
+                  } else {
+                    editor.chain().focus().setParagraphSpacingAfter(spacingAfter).run();
+                  }
                 }}
                 className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
-                title="Paragraph Spacing After"
+                title="Spacing After"
               >
                 <option value="default">Spacing After</option>
                 <option value="0">0px</option>
@@ -883,8 +941,8 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-3 text-sm">
-                  <p className="font-medium mb-1">Paragraph Spacing After</p>
-                  <p className="text-zinc-600 dark:text-zinc-400">Control the space below the paragraph. Higher values create more space after the paragraph.</p>
+                  <p className="font-medium mb-1">Spacing After</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">Control the space below the paragraph or heading. Higher values create more space after the element.</p>
                 </PopoverContent>
               </Popover>
             </div>
@@ -953,9 +1011,12 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
           "min-h-[500px] bg-white dark:bg-[#212121] flex-1"
         )}
       >
-        <div className="p-6">
-          <EditorContent editor={editor} />
+        <div className="flex justify-center w-full">
+          <div className=" shadow-xl rounded-md w-[820px]">
+            <EditorContent editor={editor} />
+          </div>
         </div>
+
       </div>
 
     </div>
