@@ -461,6 +461,15 @@ const createFullHTML = (html: string) => {
             {/* Font Size */}
             <div className="flex gap-1 border-r pr-2 items-center">
               <select
+                value={(() => {
+                  if (!editor) return "default";
+                  const { state } = editor;
+                  const { selection } = state;
+                  const { $from } = selection;
+                  const marks = $from.marks();
+                  const fontSizeMark = marks.find(mark => mark.type.name === "textStyle" && mark.attrs.fontSize);
+                  return fontSizeMark?.attrs.fontSize || "default";
+                })()}
                 onChange={(e) => {
                   const size = e.target.value;
                   if (size === "default") {
@@ -470,7 +479,6 @@ const createFullHTML = (html: string) => {
                   }
                 }}
                 className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
-                defaultValue="default"
                 title="Font Size"
               >
                 <option value="default">Font Size</option>
@@ -612,6 +620,25 @@ const createFullHTML = (html: string) => {
             <div className="flex gap-1 border-r pr-2 items-center">
               <input
                 type="color"
+                value={(() => {
+                  if (!editor) return "#e5e7eb";
+                  const { state } = editor;
+                  const { selection } = state;
+                  let hrNode = null;
+                  
+                  if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
+                    hrNode = selection.node;
+                  } else {
+                    const { $from } = selection;
+                    if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
+                      hrNode = $from.nodeBefore;
+                    } else if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
+                      hrNode = $from.nodeAfter;
+                    }
+                  }
+                  
+                  return hrNode?.attrs.color || "#e5e7eb";
+                })()}
                 onChange={(e) => {
                   const updated = editor.chain().focus().updateHorizontalRule({ color: e.target.value }).run();
                   if (!updated) {
@@ -637,6 +664,25 @@ const createFullHTML = (html: string) => {
             {/* Horizontal Rule - Thickness */}
             <div className="flex gap-1 border-r pr-2 items-center">
               <select
+                value={(() => {
+                  if (!editor) return "2px";
+                  const { state } = editor;
+                  const { selection } = state;
+                  let hrNode = null;
+                  
+                  if (selection instanceof NodeSelection && selection.node.type.name === "horizontalRule") {
+                    hrNode = selection.node;
+                  } else {
+                    const { $from } = selection;
+                    if ($from.nodeBefore && $from.nodeBefore.type.name === "horizontalRule") {
+                      hrNode = $from.nodeBefore;
+                    } else if ($from.nodeAfter && $from.nodeAfter.type.name === "horizontalRule") {
+                      hrNode = $from.nodeAfter;
+                    }
+                  }
+                  
+                  return hrNode?.attrs.thickness || "2px";
+                })()}
                 onChange={(e) => {
                   const updated = editor.chain().focus().updateHorizontalRule({ thickness: e.target.value }).run();
                   if (!updated) {
@@ -644,7 +690,6 @@ const createFullHTML = (html: string) => {
                   }
                 }}
                 className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
-                defaultValue="2px"
                 title="Line Thickness"
               >
                 <option value="1px">Thin</option>
@@ -777,6 +822,15 @@ const createFullHTML = (html: string) => {
             <div className="flex gap-1 border-r pr-2 items-center">
               <input
                 type="color"
+                value={(() => {
+                  if (!editor) return "#000000";
+                  const { state } = editor;
+                  const { selection } = state;
+                  const { $from } = selection;
+                  const marks = $from.marks();
+                  const colorMark = marks.find(mark => mark.type.name === "textStyle" && mark.attrs.color);
+                  return colorMark?.attrs.color || "#000000";
+                })()}
                 onChange={(e) => {
                   editor.chain().focus().setColor(e.target.value).run();
                 }}
@@ -799,6 +853,17 @@ const createFullHTML = (html: string) => {
             {/* Line Height */}
             <div className="flex gap-1 border-r pr-2 items-center">
               <select
+                value={(() => {
+                  if (!editor) return "default";
+                  const { state } = editor;
+                  const { selection } = state;
+                  const { $from } = selection;
+                  const node = $from.parent;
+                  if ((node.type.name === "paragraph" || node.type.name === "heading") && node.attrs.lineHeight) {
+                    return node.attrs.lineHeight;
+                  }
+                  return "default";
+                })()}
                 onChange={(e) => {
                   const lineHeight = e.target.value;
                   if (lineHeight === "default") {
@@ -809,7 +874,6 @@ const createFullHTML = (html: string) => {
                 }}
                 className="h-8 px-2 rounded-md border bg-background text-sm dark:bg-[#212121] dark:text-white dark:border-zinc-700"
                 title="Line Height"
-                defaultValue="default"
               >
                 <option value="default">Line Height</option>
                 <option value="1">1.0</option>
