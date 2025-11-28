@@ -428,7 +428,7 @@ export default function Home() {
         entryStartTag = '<p';
         nextEntryMarker = '[ACHIEVEMENT DESCRIPTION]';
       } else {
-        return; // Unknown entry type
+        return; 
       }
       
 
@@ -499,7 +499,7 @@ export default function Home() {
 
 
 
-          let selectedPEndIndex = pEndMatches.length - 1; // Default to last </p>
+          let selectedPEndIndex = pEndMatches.length - 1; 
           
 
           for (let i = 0; i < pEndMatches.length; i++) {
@@ -704,26 +704,26 @@ export default function Home() {
           
           if (!template) {
             const staticContent = `${headerSection}
-${createSectionHeading("SUMMARY")}
-<p><span style="font-family: &quot;Times New Roman&quot;, serif;">[SUMMARY]</span></p>
-${createSectionHeading("EXPERIENCE")}
-<h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[COMPANY NAME], [JOB TITLE], [LOCATION]</span></h3>
-<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em></span></p>
-<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Tech Stack:</strong> [TECHNOLOGIES]</span></p>
-<ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
-${createSectionHeading("PROJECTS")}
-<h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[PROJECT NAME]</span></h3>
-<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Technologies:</strong> [TECHNOLOGIES]</span></p>
-<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Link:</strong> [PROJECT LINK]</span></p>
-<ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
-${createSectionHeading("SKILLS")}
-<p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[SKILL CATEGORY]:</strong> [SKILLS]</span></p>
+            ${createSectionHeading("SUMMARY")}
+            <p><span style="font-family: &quot;Times New Roman&quot;, serif;">[SUMMARY]</span></p>
+            ${createSectionHeading("EXPERIENCE")}
+            <h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[COMPANY NAME], [JOB TITLE], [LOCATION]</span></h3>
+            <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><em>[START DATE] - [END DATE]</em></span></p>
+            <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Tech Stack:</strong> [TECHNOLOGIES]</span></p>
+            <ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
+            ${createSectionHeading("PROJECTS")}
+            <h3><span style="font-size: 18px; font-family: &quot;Times New Roman&quot;, serif;">[PROJECT NAME]</span></h3>
+            <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Technologies:</strong> [TECHNOLOGIES]</span></p>
+            <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>Link:</strong> [PROJECT LINK]</span></p>
+            <ul><li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">[DESCRIPTION]</span></p></li></ul>
+            ${createSectionHeading("SKILLS")}
+            <p><span style="font-family: &quot;Times New Roman&quot;, serif;"><strong>[SKILL CATEGORY]:</strong> [SKILLS]</span></p>
 
-${educationSection}
+            ${educationSection}
 
-${publicationsSection}
+            ${publicationsSection}
 
-${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : ''}`;
+            ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : ''}`;
 
             let contentWithData = replacePlaceholdersWithData(staticContent, data);
             
@@ -923,26 +923,26 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
       } else {
 
 
-        let templateWithData = replacePlaceholdersWithData(TEMPLATE_RESUME_CONTENT, userDetails);
+        let templateWithData = replacePlaceholdersWithData(savedTemplate || TEMPLATE_RESUME_CONTENT, userDetails);
         templateWithData = formatDatesInContent(templateWithData);
         setResumeContent(templateWithData);
       }
     }
   }, [userDetails, savedTemplate, sections]);
 
-  // Helper function to convert newline-separated points to HTML bullet points
+  
   const convertToHtmlBullets = (text: string): string => {
     if (!text) return '';
     
-    // Split by newlines and filter out empty lines
+    
     const points = text.split('\n').filter(line => line.trim().length > 0);
     
     if (points.length === 0) return '';
     
-    // Convert each point to a list item
+    
     const listItems = points.map(point => {
       const trimmedPoint = point.trim();
-      // Remove any leading bullet characters or dashes
+      
       const cleanPoint = trimmedPoint.replace(/^[●•\-\*]\s*/, '');
       return `<li><p data-spacing-after="0" style="margin-bottom: 0px;"><span style="font-family: &quot;Times New Roman&quot;, serif;">${cleanPoint}</span></p></li>`;
     }).join('');
@@ -1018,7 +1018,7 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
                   message: data.message || "",
                 });
               } else if (data.type === "section") {
-                // Store section with metadata
+                
                 const sectionKey = data.section === 'experience' || data.section === 'project' 
                   ? `${data.section}_${data.index || 0}`
                   : data.section;
@@ -1034,6 +1034,91 @@ ${certificationsSection}${achievementsSection ? `\n\n${achievementsSection}` : '
                     index: data.index,
                   },
                 }));
+                
+                
+                if (data.section === 'summary' && data.content) {
+                  
+                  setUserDetails((prevDetails: any) => {
+                    if (!prevDetails) return prevDetails;
+                    
+                    
+                    const updatedDetails = {
+                      ...prevDetails,
+                      userProfile: {
+                        ...prevDetails.userProfile,
+                        bio: data.content,
+                      },
+                    };
+                    
+                    
+                    
+                    
+                    const template = savedTemplate || TEMPLATE_RESUME_CONTENT;
+                    let contentWithData = replacePlaceholdersWithData(template, updatedDetails);
+                    contentWithData = formatDatesInContent(contentWithData);
+                    setResumeContent(contentWithData);
+                    
+                    return updatedDetails;
+                  });
+                } else if (data.section === 'experience' && data.content && typeof data.index === 'number') {
+                  
+                  setUserDetails((prevDetails: any) => {
+                    if (!prevDetails || !prevDetails.experiences) return prevDetails;
+                    
+                    
+                    const updatedExperiences = [...prevDetails.experiences];
+                    if (updatedExperiences[data.index]) {
+                      updatedExperiences[data.index] = {
+                        ...updatedExperiences[data.index],
+                        description: data.content,
+                      };
+                    }
+                    
+                    
+                    const updatedDetails = {
+                      ...prevDetails,
+                      experiences: updatedExperiences,
+                    };
+                    
+                    
+                    const template = savedTemplate || TEMPLATE_RESUME_CONTENT;
+                    let contentWithData = replacePlaceholdersWithData(template, updatedDetails);
+                    contentWithData = formatDatesInContent(contentWithData);
+                    setResumeContent(contentWithData);
+                    
+                    return updatedDetails;
+                  });
+                } else if (data.section === 'project' && data.content && typeof data.index === 'number') {
+
+                  
+                  setUserDetails((prevDetails: any) => {
+                    if (!prevDetails || !prevDetails.projects) return prevDetails;
+                    
+                    
+                    const updatedProjects = [...prevDetails.projects];
+                    if (updatedProjects[data.index]) {
+                      updatedProjects[data.index] = {
+                        ...updatedProjects[data.index],
+                        description: data.content,
+                      };
+                    }
+                    
+                    
+                    const updatedDetails = {
+                      ...prevDetails,
+                      projects: updatedProjects,
+                    };
+                    
+                    
+                    const template = savedTemplate || TEMPLATE_RESUME_CONTENT;
+                    let contentWithData = replacePlaceholdersWithData(template, updatedDetails);
+                    contentWithData = formatDatesInContent(contentWithData);
+                    setResumeContent(contentWithData);
+                    
+                    return updatedDetails;
+                  });
+                }
+                
                 setProgress({
                   current: data.progress?.current || 0,
                   total: data.progress?.total || 0,
