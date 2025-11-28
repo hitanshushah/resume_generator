@@ -9,7 +9,9 @@ import { Progress } from "@/components/ui/progress";
 import { ResumeEditor } from "@/components/ResumeEditor";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Terminal } from "lucide-react";
 
 interface SectionData {
   title: string;
@@ -2117,7 +2119,66 @@ export default function Home() {
                 </Button>
               )}
             </div>
+            <div className="mt-6 space-y-2">
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger asChild>
+                  <Alert
+                    variant="default"
+                    className="cursor-pointer flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Generate Resume</AlertTitle>
+                    </div>
+                    <ChevronDown className="h-4 w-4" />
+                  </Alert>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="bg-white dark:bg-gray-800 p-4 space-y-2 rounded-b-md border border-t-0 border-gray-200 dark:border-gray-700">
+                    <AlertDescription>
+                      When generating the resume, the editor will automatically replace the old content with the AI generated responses in real time.
+                    </AlertDescription>
+                    <AlertDescription>
+                      You can view all AI generated responses in the "View All Generated Responses" dropdown in case required for formatting after generation.
+                    </AlertDescription>
+                    <AlertDescription>
+                      Generating the resume may take a few minutes. Please stay on this page while it’s processing; an error will be shown if the generation fails.
+                    </AlertDescription>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
+
+            <div className="mt-6 space-y-2">
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger asChild>
+                <Alert
+                    variant="default"
+                    className="cursor-pointer flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Editor Tips!</AlertTitle>
+                    </div>
+                    <ChevronDown className="h-4 w-4" />
+                  </Alert>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="bg-white dark:bg-gray-800 p-4 space-y-2 rounded-b-md border border-t-0 border-gray-200 dark:border-gray-700">
+                    <AlertDescription>
+                      Save Template: You need to edit only the first entry of each section to save the template; it will automatically format the rest of the entries.
+                    </AlertDescription>
+                    <AlertDescription>
+                      Select Function: This selects the nearest horizontal line to the cursor, as it can be difficult to select a horizontal line manually.
+                    </AlertDescription>
+                    <AlertDescription>
+                      Editor Tips: Click on a tooltip to see what each function does. All toolbar functions have tooltips with descriptions.
+                    </AlertDescription>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
             {/* Progress Bar */}
             {loading && progress.total > 0 && (
               <div className="space-y-2">
@@ -2188,12 +2249,8 @@ export default function Home() {
                 </CollapsibleContent>
               </Collapsible>
             )}
-
             {/* Resume Editor - Shows template by default, updates when sections are generated */}
             <div className="mt-6 space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Resume Editor {Object.keys(sections).length > 0 ? "(Generated)" : "(Template)"}
-              </label>
               <input
                 ref={fileInputRef}
                 type="file"
