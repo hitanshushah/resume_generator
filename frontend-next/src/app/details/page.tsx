@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
+import { useUserStore } from "@/store/userStore";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,9 @@ import { Pencil } from "lucide-react";
 
 export default function DetailsPage() {
   const { user, loading: userLoading } = useUser();
+  const { user: storeUser } = useUserStore();
+  // Fallback to store user if context user is not available
+  const currentUser = user || storeUser;
   const [data, setData] = useState<UserDetailsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +42,7 @@ export default function DetailsPage() {
     }
 
     const fetchUserDetails = async () => {
-      if (!user?.id) {
+      if (!currentUser?.id) {
         setError("User not found. Please log in.");
         setLoading(false);
         return;
@@ -48,7 +52,7 @@ export default function DetailsPage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/user-details/${user.id}`);
+        const response = await fetch(`/api/user-details/${currentUser.id}`);
         
         if (!response.ok) {
           const errorData = await response.json();
@@ -66,7 +70,7 @@ export default function DetailsPage() {
     };
 
     fetchUserDetails();
-  }, [user?.id, userLoading]);
+  }, [currentUser?.id, userLoading]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Present";
