@@ -357,6 +357,7 @@ REQUIREMENTS:
 - Maintain similar level of detail as the original description
 - Use keywords and terminology from the job description
 - Generate response in new lines with one point per line
+- Output must be in separate lines (newline-separated: \n), NOT bullet points.
 - Each point should be NOT more than 2 lines (not in one paragraph)
 - Format: Each point on a new line, where each point is maximum 2 lines long
 - Do NOT include company name, job title, location, dates, or technologies
@@ -405,6 +406,7 @@ REQUIREMENTS:
 - Do NOT add or remove projects
 - Do NOT change the structure or format
 - Do NOT create, invent, or generate any projects that are not in the user's actual project list
+- Output must be in separate lines (newline-separated: \n), NOT bullet points.
 - Generate response in new lines with one point per line
 - Each point should be NOT more than 2 lines (not in one paragraph)
 - Format: Each point on a new line, where each point is maximum 2 lines long
