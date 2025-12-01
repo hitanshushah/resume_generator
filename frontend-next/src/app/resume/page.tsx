@@ -480,7 +480,7 @@ export default function ResumePage() {
   // If user is not Pro, show subscription message
   if (!isPro) {
     return (
-      <div className="container mx-auto p-8">
+      <div className="mx-auto p-8 dark:bg-[#212121] min-h-screen">
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -533,7 +533,7 @@ export default function ResumePage() {
   }
 
   return (
-    <div className="container mx-auto p-8 space-y-6">
+    <div className="mx-auto p-8 space-y-6 dark:bg-[#212121] min-h-screen">
       {/* Header with Upload and Create Folder Buttons */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -574,13 +574,13 @@ export default function ResumePage() {
           <p className="text-muted-foreground">Loading resumes...</p>
         </div>
       ) : resumesData && (
-        <div className="border rounded-lg bg-white dark:bg-[#212121]">
+        <div className="border rounded-lg bg-white dark:bg-[#303030] dark:text-white">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[50px]"></TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead className="dark:text-white">Name</TableHead>
+                <TableHead className="dark:text-white">Created</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>

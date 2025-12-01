@@ -2062,7 +2062,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen justify-center bg-white font-sans dark:bg-[#212121] p-8">
+    <div className="flex min-h-screen justify-center bg-white font-sans dark:bg-[#212121] p-4 lg:p-8">
       <main className="w-full max-w-7xl">
         <Card className="dark:bg-[#212121] bg-white border-0 shadow-none">
 
@@ -2124,25 +2124,25 @@ export default function Home() {
                 <CollapsibleTrigger asChild>
                   <Alert
                     variant="default"
-                    className="cursor-pointer flex items-center justify-between"
+                    className="cursor-pointer flex items-center justify-between bg-gray-50 dark:bg-[#181818]"
                   >
                     <div className="flex items-center gap-2">
-                      <Info className="h-4 w-4" />
-                      <AlertTitle>Generate Resume</AlertTitle>
+                      <Info className="h-4 w-4 text-gray-600 dark:text-white" />
+                      <AlertTitle className="text-gray-900 dark:text-gray-100">Generate Resume</AlertTitle>
                     </div>
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4 text-gray-600 dark:text-white" />
                   </Alert>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="bg-white dark:bg-gray-800 p-4 space-y-2 rounded-b-md border border-t-0 border-gray-200 dark:border-gray-700">
-                    <AlertDescription>
+                  <div className="bg-white dark:bg-[#303030] p-4 space-y-2 rounded-b-md">
+                    <AlertDescription className="text-gray-700 dark:text-gray-300">
                       When generating the resume, the editor will automatically replace the old content with the AI generated responses in real time.
                     </AlertDescription>
-                    <AlertDescription>
+                    <AlertDescription className="text-gray-700 dark:text-gray-300">
                       You can view all AI generated responses in the "View All Generated Responses" dropdown in case required for formatting after generation.
                     </AlertDescription>
-                    <AlertDescription>
-                      Generating the resume may take a few minutes. Please stay on this page while it’s processing; an error will be shown if the generation fails.
+                    <AlertDescription className="text-gray-700 dark:text-gray-300">
+                      Generating the resume may take a few minutes. Please stay on this page while it's processing; an error will be shown if the generation fails.
                     </AlertDescription>
                   </div>
                 </CollapsibleContent>
@@ -2155,24 +2155,24 @@ export default function Home() {
                 <CollapsibleTrigger asChild>
                 <Alert
                     variant="default"
-                    className="cursor-pointer flex items-center justify-between"
+                    className="cursor-pointer flex items-center justify-between bg-gray-50 dark:bg-[#181818]"
                   >
                     <div className="flex items-center gap-2">
-                      <Info className="h-4 w-4" />
-                      <AlertTitle>Editor Tips!</AlertTitle>
+                      <Info className="h-4 w-4 text-gray-600 dark:text-white" />
+                      <AlertTitle className="text-gray-900 dark:text-white">Editor Tips!</AlertTitle>
                     </div>
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4 text-gray-600 dark:text-white" />
                   </Alert>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="bg-white dark:bg-gray-800 p-4 space-y-2 rounded-b-md border border-t-0 border-gray-200 dark:border-gray-700">
-                    <AlertDescription>
+                  <div className="bg-white dark:bg-[#303030] p-4 space-y-2 rounded-b-md">
+                    <AlertDescription className="text-gray-700 dark:text-gray-300">
                       Save Template: You need to edit only the first entry of each section to save the template; it will automatically format the rest of the entries.
                     </AlertDescription>
-                    <AlertDescription>
+                    <AlertDescription className="text-gray-700 dark:text-gray-300">
                       Select Function: This selects the nearest horizontal line to the cursor, as it can be difficult to select a horizontal line manually.
                     </AlertDescription>
-                    <AlertDescription>
+                    <AlertDescription className="text-gray-700 dark:text-gray-300">
                       Editor Tips: Click on a tooltip to see what each function does. All toolbar functions have tooltips with descriptions.
                     </AlertDescription>
                   </div>

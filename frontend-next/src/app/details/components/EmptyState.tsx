@@ -16,8 +16,8 @@ export function EmptyState({ sectionName }: EmptyStateProps) {
 
   return (
     <div className="text-center py-8 space-y-4">
-      <p className="text-muted-foreground">Add your first {sectionName}</p>
-      <Button onClick={handleAddClick} variant="outline">
+      <p className="text-muted-foreground dark:text-gray-300">Add your first {sectionName}</p>
+      <Button onClick={handleAddClick} variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#404040]">
         Add {sectionName}
       </Button>
     </div>

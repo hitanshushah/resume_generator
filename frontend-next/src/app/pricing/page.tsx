@@ -35,14 +35,14 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 dark:from-[#212121] dark:to-[#212121] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4 text-gray-900 dark:text-white">
             Choose Your Plan
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
             Select the plan that best fits your needs. Upgrade or downgrade at any time.
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function PricingPage() {
             <Card
               key={plan.name}
               className={cn(
-                "relative flex flex-col",
+                "relative flex flex-col bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700",
                 plan.popular && "border-primary shadow-lg scale-105"
               )}
             >
@@ -67,16 +67,16 @@ export default function PricingPage() {
               )}
               
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
+                <CardTitle className="text-2xl mb-2 text-gray-900 dark:text-white">{plan.name}</CardTitle>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold">{plan.price}</span>
+                  <span className="text-4xl font-bold text-gray-900 dark:text-white">{plan.price}</span>
                   {plan.pricePeriod && (
-                    <span className="text-muted-foreground text-lg">
+                    <span className="text-muted-foreground dark:text-gray-300 text-lg">
                       {plan.pricePeriod}
                     </span>
                   )}
                 </div>
-                <CardDescription className="mt-2">
+                <CardDescription className="mt-2 text-gray-600 dark:text-gray-300">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
@@ -85,8 +85,8 @@ export default function PricingPage() {
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
+                      <Check className="h-5 w-5 text-primary dark:text-white mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
                     </li>
                   ))}
                 </ul>

@@ -1113,11 +1113,11 @@ const createFullHTML = (html: string) => {
         ref={scrollContainerRef}
         id="editor-scroll-container"
         className={cn(
-          "min-h-[500px] bg-white dark:bg-[#212121] flex-1"
+          "min-h-[500px] bg-white flex-1 dark:bg-[#212121]"
         )}
       >
         <div className="flex justify-center w-full">
-          <div className=" shadow-xl rounded-md w-[820px]">
+          <div className=" shadow-xl rounded-md w-[820px] bg-white">
             <EditorContent editor={editor} />
           </div>
         </div>

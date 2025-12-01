@@ -92,17 +92,17 @@ export default function DetailsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-8 space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className=" mx-auto p-8 space-y-6 bg-white dark:bg-[#212121] min-h-screen">
+        <Skeleton className="h-32 w-full bg-gray-200 dark:bg-[#303030]" />
+        <Skeleton className="h-64 w-full bg-gray-200 dark:bg-[#303030]" />
+        <Skeleton className="h-64 w-full bg-gray-200 dark:bg-[#303030]" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-8">
+      <div className=" mx-auto p-8 bg-white dark:bg-[#212121] min-h-screen">
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -112,9 +112,9 @@ export default function DetailsPage() {
 
   if (!data) {
     return (
-      <div className="container mx-auto p-8">
-        <Alert>
-          <AlertDescription>No data available</AlertDescription>
+      <div className=" mx-auto p-8 bg-white dark:bg-[#212121] min-h-screen">
+        <Alert className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
+          <AlertDescription className="text-gray-700 dark:text-gray-300">No data available</AlertDescription>
         </Alert>
       </div>
     );
@@ -132,29 +132,29 @@ export default function DetailsPage() {
 
 
   return (
-    <div className="container mx-auto p-8 space-y-6">
+    <div className=" mx-auto p-8 space-y-6 bg-white dark:bg-[#212121] min-h-screen">
       {/* Profile Header */}
-      <Card>
+      <Card className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
         <CardHeader>
           <div className="flex items-start gap-6">
             <Avatar className="w-24 h-24">
               {userProfile.profile_photo_url ? (
                 <AvatarImage src={userProfile.profile_photo_url} alt={userProfile.name || userProfile.username} />
               ) : null}
-              <AvatarFallback className="text-2xl">
+              <AvatarFallback className="text-2xl bg-gray-100 dark:bg-[#404040] text-gray-900 dark:text-white">
                 {getInitials(userProfile.name, userProfile.username)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-2">
-              <CardTitle className="text-3xl">{userProfile.name || userProfile.username}</CardTitle>
+              <CardTitle className="text-3xl text-gray-900 dark:text-white">{userProfile.name || userProfile.username}</CardTitle>
               {userProfile.designation && (
-                <CardDescription className="text-lg">{userProfile.designation}</CardDescription>
+                <CardDescription className="text-lg text-gray-600 dark:text-gray-300">{userProfile.designation}</CardDescription>
               )}
-              {userProfile.bio && <p className="text-muted-foreground">{userProfile.bio}</p>}
+              {userProfile.bio && <p className="text-muted-foreground dark:text-gray-300">{userProfile.bio}</p>}
               <div className="flex flex-wrap gap-2">
-                {userProfile.city && <Badge variant="outline">{userProfile.city}</Badge>}
-                {userProfile.province && <Badge variant="outline">{userProfile.province}</Badge>}
-                {userProfile.country && <Badge variant="outline">{userProfile.country}</Badge>}
+                {userProfile.city && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.city}</Badge>}
+                {userProfile.province && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.province}</Badge>}
+                {userProfile.country && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.country}</Badge>}
               </div>
               {userProfile.links && userProfile.links.length > 0 && (
                 <div className="flex flex-wrap flex-col gap-2 pt-2 w-fit">
@@ -164,7 +164,7 @@ export default function DetailsPage() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm text-primary dark:text-blue-400 hover:underline"
                     >
                       {link.title} -{link.url}
                     </a>
@@ -172,25 +172,25 @@ export default function DetailsPage() {
                 </div>
               )}
               <div className="flex flex-wrap pt-2 gap-4">
-                {userProfile.email && <Badge variant="outline">{userProfile.email}</Badge>}
-                {userProfile.phone_number && <Badge variant="outline">{userProfile.phone_number}</Badge>}
+                {userProfile.email && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.email}</Badge>}
+                {userProfile.phone_number && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.phone_number}</Badge>}
               </div>
             </div> 
             <Button
                   onClick={handleAddClick}
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="gap-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#404040]"
                 >
-                  <Pencil className="h-4 w-4" />
+                  <Pencil className="h-4 w-4 text-gray-600 dark:text-white" />
                   Edit
                 </Button> 
           </div>
         </CardHeader>
         {userProfile.introduction && (
           <CardContent>
-            <Separator className="my-4" />
-            <p className="text-muted-foreground whitespace-pre-wrap">{userProfile.introduction}</p>
+            <Separator className="my-4 bg-gray-200 dark:bg-gray-700" />
+            <p className="text-muted-foreground dark:text-gray-300 whitespace-pre-wrap">{userProfile.introduction}</p>
           </CardContent>
         )}
       </Card>
@@ -204,13 +204,13 @@ export default function DetailsPage() {
         {projects && projects.length > 0 ? (
           <div className="space-y-4">
             {projects.map((project) => (
-              <Card key={project.id}>
+              <Card key={project.id} className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle>{project.name}</CardTitle>
+                      <CardTitle className="text-gray-900 dark:text-white">{project.name}</CardTitle>
                       {project.category && (
-                        <CardDescription className="mt-1">
+                        <CardDescription className="mt-1 text-gray-600 dark:text-gray-300">
                           {project.category} {project.status && `• ${project.status}`}
                         </CardDescription>
                       )}
@@ -218,11 +218,11 @@ export default function DetailsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {project.description && <p className="text-muted-foreground">{project.description}</p>}
+                  {project.description && <p className="text-muted-foreground dark:text-gray-300">{project.description}</p>}
                   {project.technologies && project.technologies.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {project.technologies.map((tech, idx) => (
-                        <Badge key={idx} variant="secondary">{tech}</Badge>
+                        <Badge key={idx} variant="secondary" className="bg-gray-100 dark:bg-[#404040] text-gray-700 dark:text-gray-300">{tech}</Badge>
                       ))}
                     </div>
                   )}
@@ -234,7 +234,7 @@ export default function DetailsPage() {
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-primary hover:underline"
+                          className="text-sm text-primary dark:text-blue-400 hover:underline"
                         >
                           {link.title} - {link.url}
                         </a>
@@ -259,27 +259,27 @@ export default function DetailsPage() {
         {experiences && experiences.length > 0 ? (
           <div className="space-y-4">
             {experiences.map((exp) => (
-              <Card key={exp.id}>
+              <Card key={exp.id} className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle>{exp.role}</CardTitle>
-                      <CardDescription className="mt-1">{exp.company_name}</CardDescription>
-                      {exp.location && <CardDescription>{exp.location}</CardDescription>}
+                      <CardTitle className="text-gray-900 dark:text-white">{exp.role}</CardTitle>
+                      <CardDescription className="mt-1 text-gray-600 dark:text-gray-300">{exp.company_name}</CardDescription>
+                      {exp.location && <CardDescription className="text-gray-600 dark:text-gray-300">{exp.location}</CardDescription>}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground dark:text-gray-300">
                       {formatDate(exp.start_date)} - {formatDate(exp.end_date)}
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {exp.description && (
-                    <p className="text-muted-foreground whitespace-pre-wrap">{exp.description}</p>
+                    <p className="text-muted-foreground dark:text-gray-300 whitespace-pre-wrap">{exp.description}</p>
                   )}
                  {exp.skills && exp.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {exp.skills.map((skill, idx) => (
-                        <Badge key={idx} variant="secondary">{skill}</Badge>
+                        <Badge key={idx} variant="secondary" className="bg-gray-100 dark:bg-[#404040] text-gray-700 dark:text-gray-300">{skill}</Badge>
                       ))}
                     </div>
                   )}
@@ -301,16 +301,16 @@ export default function DetailsPage() {
         {education && education.length > 0 ? (
           <div className="space-y-4">
             {education.map((edu) => (
-              <Card key={edu.id}>
+              <Card key={edu.id} className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle>{edu.degree}</CardTitle>
-                      <CardDescription className="mt-1">{edu.university_name}</CardDescription>
-                      {edu.location && <CardDescription>{edu.location}</CardDescription>}
-                      {edu.cgpa && <CardDescription>Grade: {edu.cgpa}</CardDescription>}
+                      <CardTitle className="text-gray-900 dark:text-white">{edu.degree}</CardTitle>
+                      <CardDescription className="mt-1 text-gray-600 dark:text-gray-300">{edu.university_name}</CardDescription>
+                      {edu.location && <CardDescription className="text-gray-600 dark:text-gray-300">{edu.location}</CardDescription>}
+                      {edu.cgpa && <CardDescription className="text-gray-600 dark:text-gray-300">Grade: {edu.cgpa}</CardDescription>}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground dark:text-gray-300">
                       {formatDate(edu.from_date)} - {formatDate(edu.end_date)}
                     </div>
                   </div>
@@ -347,20 +347,20 @@ export default function DetailsPage() {
               <div className="space-y-6">
                 {categories.map((categoryName) => (
                   <div key={categoryName} className="space-y-3">
-                    <h3 className="text-lg font-semibold">{categoryName}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{categoryName}</h3>
                     <div className="space-y-3 pl-4">
                       {groupedSkills[categoryName].map((skill) => (
                         <div key={skill.id} className="space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium">{skill.name}</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{skill.name}</span>
                             {skill.proficiency_level && (
-                              <Badge variant="outline">{skill.proficiency_level}</Badge>
+                              <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{skill.proficiency_level}</Badge>
                             )}
                           </div>
                           {skill.description && (
-                            <p className="text-sm text-muted-foreground">{skill.description}</p>
+                            <p className="text-sm text-muted-foreground dark:text-gray-300">{skill.description}</p>
                           )}
-                          <Separator />
+                          <Separator className="bg-gray-200 dark:bg-gray-700" />
                         </div>
                       ))}
                     </div>
@@ -384,17 +384,17 @@ export default function DetailsPage() {
           <div className="space-y-4">
             {certifications.map((cert) => (
               <div key={cert.id} className="space-y-1">
-                <div className="font-medium">{cert.name}</div>
+                <div className="font-medium text-gray-900 dark:text-white">{cert.name}</div>
                 {cert.institute_name && (
-                  <CardDescription>{cert.institute_name}</CardDescription>
+                  <CardDescription className="text-gray-600 dark:text-gray-300">{cert.institute_name}</CardDescription>
                 )}
                 {cert.description && (
-                  <p className="text-sm text-muted-foreground">{cert.description}</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-300">{cert.description}</p>
                 )}
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground dark:text-gray-300">
                   {formatDate(cert.start_date)} - {formatDate(cert.end_date)}
                 </div>
-                <Separator />
+                <Separator className="bg-gray-200 dark:bg-gray-700" />
               </div>
             ))}
           </div>
@@ -413,8 +413,8 @@ export default function DetailsPage() {
           <div className="space-y-2">
             {achievements.map((achievement) => (
               <div key={achievement.id} className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <p className="text-muted-foreground">{achievement.description}</p>
+                <span className="text-primary dark:text-blue-400">•</span>
+                <p className="text-muted-foreground dark:text-gray-300">{achievement.description}</p>
               </div>
             ))}
           </div>
@@ -433,15 +433,15 @@ export default function DetailsPage() {
           <div className="space-y-4">
             {publications.map((pub) => (
               <div key={pub.id} className="space-y-1">
-                <div className="font-medium">{pub.paper_name}</div>
+                <div className="font-medium text-gray-900 dark:text-white">{pub.paper_name}</div>
                 {pub.conference_name && (
-                  <CardDescription>{pub.conference_name}</CardDescription>
+                  <CardDescription className="text-gray-600 dark:text-gray-300">{pub.conference_name}</CardDescription>
                 )}
                 {pub.description && (
-                  <p className="text-sm text-muted-foreground">{pub.description}</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-300">{pub.description}</p>
                 )}
                 {pub.published_date && (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground dark:text-gray-300">
                     Published: {formatDate(pub.published_date)}
                   </div>
                 )}
@@ -450,12 +450,12 @@ export default function DetailsPage() {
                     href={pub.paper_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline"
+                    className="text-sm text-primary dark:text-blue-400 hover:underline"
                   >
                     Paper Link - {pub.paper_link}
                   </a>
                 )}
-                <Separator />
+                <Separator className="bg-gray-200 dark:bg-gray-700" />
               </div>
             ))}
           </div>
