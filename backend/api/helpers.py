@@ -132,6 +132,7 @@ def get_user_details_data(user_id_int):
                     LEFT JOIN status s ON pr.status_id = s.id
                     WHERE pr.user_id = %s
                       AND pr.is_public = TRUE
+                      AND pr.hide_on_website = FALSE
                       AND pr.deleted_at IS NULL
                 ),
 
