@@ -8,6 +8,9 @@ export interface User {
   name: string | null;
   profile_photo: string | null;
   created?: boolean;
+  premium_plan_id?: number | null;
+  plan_name?: string;
+  is_pro?: boolean;
 }
 
 interface UserState {

@@ -19,6 +19,7 @@ import {
   IconFileText,
   IconUser,
   IconLogout,
+  IconCurrencyDollar,
 } from "@tabler/icons-react";
 
 export function Navbar() {
@@ -40,8 +41,9 @@ export function Navbar() {
 
   const navItems = [
     { href: "/", label: "Home", icon: IconHome },
-    { href: "/resume", label: "Resume", icon: IconFileText },
-    { href: "/details", label: "Details", icon: IconUser },
+    { href: "/resume", label: "File Storage", icon: IconFileText },
+    { href: "/details", label: "User Details", icon: IconUser },
+    { href: "/pricing", label: "Pricing Plans", icon: IconCurrencyDollar },
   ];
 
   return (
@@ -109,6 +111,26 @@ export function Navbar() {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+
+                {/* Plan Banner */}
+                <div className={`px-3 py-2 border-b dark:border-gray-700 ${
+                  user.is_pro 
+                    ? 'bg-primary/10 border-primary/20' 
+                    : 'bg-muted/50 border-gray-200 dark:border-gray-700'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground dark:text-gray-400">
+                      Plan
+                    </span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                      user.is_pro
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground dark:bg-gray-700 dark:text-gray-300'
+                    }`}>
+                      {user.plan_name || 'Basic'}
+                    </span>
+                  </div>
+                </div>
 
                 <DropdownMenuSeparator className="dark:bg-gray-700" />
 

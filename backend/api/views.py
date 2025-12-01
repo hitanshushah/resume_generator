@@ -86,24 +86,35 @@ def check_or_create_user(request):
         name = str(name).strip() if name else None
 
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id, username, email FROM users WHERE email = %s", [email])
+            cursor.execute("SELECT id, username, email, premium_plan_id FROM users WHERE email = %s", [email])
             row = cursor.fetchone()
 
             if row:
-                user_id, user_username, user_email = row
+                user_id, user_username, user_email, premium_plan_id = row
                 created = False
             else:
                 cursor.execute(
                     "INSERT INTO users (username, email, created_at, updated_at) VALUES (%s, %s, %s, %s)",
                     [username, email, timezone.now(), timezone.now()]
                 )
-                cursor.execute("SELECT id, username, email FROM users WHERE email = %s", [email])
+                cursor.execute("SELECT id, username, email, premium_plan_id FROM users WHERE email = %s", [email])
                 row = cursor.fetchone()
-                user_id, user_username, user_email = row
+                user_id, user_username, user_email, premium_plan_id = row
                 created = True
 
             profile_id, profile_name = get_or_create_profile(cursor, user_id, name)
             profile_photo = get_profile_photo(cursor, profile_id)
+            # Check premium plan if premium_plan_id exists
+            plan_name = 'Basic'
+            is_pro = False
+            if premium_plan_id:
+                cursor.execute("SELECT key FROM premium_plans WHERE id = %s", [premium_plan_id])
+                plan_row = cursor.fetchone()
+                if plan_row:
+                    plan_key = plan_row[0]
+                    if plan_key == 'pro':
+                        plan_name = 'Pro'
+                        is_pro = True
 
             return Response({
                 'id': user_id,
@@ -111,7 +122,10 @@ def check_or_create_user(request):
                 'email': user_email,
                 'name': profile_name,
                 'profile_photo': profile_photo,
-                'created': created
+                'created': created,
+                'premium_plan_id': premium_plan_id,
+                'plan_name': plan_name,
+                'is_pro': is_pro
             }, status=status.HTTP_200_OK)
 
     except Exception as e:

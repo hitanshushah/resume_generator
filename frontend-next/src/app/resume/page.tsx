@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useUser } from "@/contexts/UserContext";
 import { useUserStore } from "@/store/userStore";
 import { toast } from "sonner";
-import { Upload, FolderPlus } from "lucide-react";
+import { Upload, FolderPlus, Lock, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileRow } from "./components/FileRow";
 import { FolderRow } from "./components/FolderRow";
@@ -41,8 +43,10 @@ interface ResumesData {
 export default function ResumePage() {
   const { user } = useUser();
   const { user: storeUser } = useUserStore();
+  const router = useRouter();
 
   const currentUser = user || storeUser;
+  const isPro = currentUser?.is_pro || false;
   const [uploadingResume, setUploadingResume] = useState(false);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -472,6 +476,61 @@ export default function ResumePage() {
     setFolderToDelete({ folderKey, folderName, fileCount });
     setDeleteFolderDialogOpen(true);
   };
+
+  // If user is not Pro, show subscription message
+  if (!isPro) {
+    return (
+      <div className="container mx-auto p-8">
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="rounded-full bg-primary/10 p-4">
+                <Lock className="h-12 w-12 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl mb-2">File Storage is a Pro Feature</CardTitle>
+            <CardDescription className="text-base">
+              Subscribe to Pro plan to access file storage, upload resumes, and create folders.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <p className="font-semibold text-sm">Pro Plan includes:</p>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Upload files to File Storage
+                </li>
+                <li className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Create folders to organize your resumes
+                </li>
+                <li className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Save custom resume template and design
+                </li>
+                <li className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Import and export resume as HTML
+                </li>
+                <li className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Everything in Basic plan
+                </li>
+              </ul>
+            </div>
+            <Button 
+              onClick={() => router.push('/pricing')}
+              className="w-full"
+              size="lg"
+            >
+              Subscribe to Pro
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-8 space-y-6">

@@ -66,6 +66,9 @@ export async function getOrCreateUser(userInput: UserInput): Promise<User> {
       name: data.name || null,
       profile_photo: data.profile_photo || null,
       created: data.created || false,
+      premium_plan_id: data.premium_plan_id || null,
+      plan_name: data.plan_name || 'Basic',
+      is_pro: data.is_pro || false,
     };
 
     useUserStore.getState().setUser(user);
