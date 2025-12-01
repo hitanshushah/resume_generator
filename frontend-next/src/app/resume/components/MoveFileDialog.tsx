@@ -1,0 +1,141 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface FolderStructure {
+  files: any[];
+  folders: { [key: string]: FolderStructure };
+}
+
+interface MoveFileDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  folders: { [key: string]: FolderStructure };
+  filename: string;
+  onMove: (folderPath: string) => Promise<void>;
+  moving: boolean;
+}
+
+export function MoveFileDialog({
+  open,
+  onOpenChange,
+  folders,
+  filename,
+  onMove,
+  moving
+}: MoveFileDialogProps) {
+  const [selectedFolderPath, setSelectedFolderPath] = useState<string>("root");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedFolderPath("root");
+      setError(null);
+    }
+  }, [open]);
+
+  // Get all folder paths for selector (include root option)
+  const getAllFolderPaths = (
+    folderStructure: { [key: string]: FolderStructure },
+    parentPath: string = ""
+  ): Array<{ value: string; label: string }> => {
+    const paths: Array<{ value: string; label: string }> = [{ value: "root", label: "Root (resumes/)" }];
+    
+    function traverse(folders: { [key: string]: FolderStructure }, path: string) {
+      Object.entries(folders).forEach(([folderName, folder]) => {
+        const fullPath = path ? `${path}/${folderName}` : folderName;
+        paths.push({ value: fullPath, label: fullPath });
+        
+        if (Object.keys(folder.folders).length > 0) {
+          traverse(folder.folders, fullPath);
+        }
+      });
+    }
+    
+    traverse(folderStructure, parentPath);
+    return paths;
+  };
+
+  const folderPaths = getAllFolderPaths(folders);
+
+  const handleMove = async () => {
+    setError(null);
+    
+    // Convert "root" to empty string for backend
+    const folderPath = selectedFolderPath === "root" ? "" : selectedFolderPath;
+    
+    try {
+      await onMove(folderPath);
+      setSelectedFolderPath("root");
+      onOpenChange(false);
+    } catch (err) {
+      // Error is handled by parent component
+      console.error("Move error:", err);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Move File</DialogTitle>
+          <DialogDescription>
+            Choose where to move <strong>{filename}</strong>. The original file will be deleted after moving.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label htmlFor="folder-select" className="text-sm font-medium">
+              Move To
+            </label>
+            <Select 
+              value={selectedFolderPath} 
+              onValueChange={setSelectedFolderPath}
+            >
+              <SelectTrigger id="folder-select">
+                <SelectValue placeholder="Select location" />
+              </SelectTrigger>
+              <SelectContent>
+                {folderPaths.map((path) => (
+                  <SelectItem key={path.value} value={path.value}>
+                    {path.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {error && (
+            <div className="p-3 rounded-lg border border-red-500 bg-red-50 dark:bg-red-900/20">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={moving}>
+            Cancel
+          </Button>
+          <Button onClick={handleMove} disabled={moving}>
+            {moving ? "Moving..." : "Move"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

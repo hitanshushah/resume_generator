@@ -122,3 +122,36 @@ def get_public_url(bucket_name: str, object_name: str):
     """Generate public URL for uploaded file"""
     return f"{MINIO_PUBLIC_URL}/{bucket_name}/{object_name}"
 
+
+def download_file(bucket_name: str, object_name: str) -> bytes:
+    """
+    Download file from MinIO
+    
+    Args:
+        bucket_name: Name of the bucket
+        object_name: Object name (path) in bucket
+    
+    Returns:
+        File data as bytes
+    """
+    global minio_client
+    if minio_client is None:
+        minio_client = get_minio_client()
+    
+    try:
+        from io import BytesIO
+        
+        # Get object from MinIO
+        response = minio_client.get_object(bucket_name, object_name)
+        file_data = response.read()
+        response.close()
+        response.release_conn()
+        
+        return file_data
+    except S3Error as e:
+        print(f'Error downloading file from MinIO: {e}')
+        raise
+    except Exception as e:
+        print(f'Error downloading file from MinIO: {e}')
+        raise
+
