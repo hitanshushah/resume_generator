@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AI Resume Generator",
   description: "Generate your resume with AI",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

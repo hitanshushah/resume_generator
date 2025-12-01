@@ -50,7 +50,7 @@ export function Navbar() {
     <nav className="sticky py-2 top-0 z-50 w-full border-b bg-[#F9F9F9] dark:bg-[#181818] border-b-slate-700 dark:border-b-slate-200">
       <div className="flex h-16 items-center px-12 w-full ">
         {/* Logo */}
-          <Image src="/logo.png" alt="Logo" width={80} height={80} onClick={() => router.push("/")} className="cursor-pointer"/>
+          <Image src="/light_logo.png" alt="Logo" width={120} height={120} onClick={() => router.push("/")} className="cursor-pointer"/>
 
         {/* Desktop Navigation - Centered */}
         {!isMobile && (
