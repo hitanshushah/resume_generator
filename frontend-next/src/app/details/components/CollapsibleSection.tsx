@@ -31,31 +31,27 @@ export function CollapsibleSection({
     <Collapsible open={isOpen} onOpenChange={onToggle}>
       <Card className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
         <CardHeader className="hover:bg-muted/50 dark:hover:bg-[#404040] transition-colors">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <CollapsibleTrigger asChild>
-              <div className="flex items-center justify-between gap-2 cursor-pointer flex-1">
-                <div>
-                <CardTitle className="text-gray-900 dark:text-white">{title}</CardTitle>
-                </div>
-                <div className="flex flex-row items-center gap-4 cursor-pointer">
-                <Button
-                  onClick={handleAddClick}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#404040]"
-                >
-                  <Pencil className="h-4 w-4 text-gray-600 dark:text-white" />
-                  Edit
-                </Button>
+              <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                <CardTitle className="text-gray-900 dark:text-white truncate">{title}</CardTitle>
                 <ChevronDownIcon
                   className={cn(
-                    "h-5 w-5 text-muted-foreground dark:text-gray-300 transition-transform duration-200",
+                    "h-5 w-5 text-muted-foreground dark:text-gray-300 transition-transform duration-200 flex-shrink-0",
                     isOpen && "transform rotate-180"
                   )}
                 />
-                </div>
               </div>
             </CollapsibleTrigger>
+            <Button
+              onClick={handleAddClick}
+              variant="outline"
+              size="sm"
+              className="gap-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#404040] flex-shrink-0"
+            >
+              <Pencil className="h-4 w-4 text-gray-600 dark:text-white" />
+              <span className="hidden sm:inline">Edit</span>
+            </Button>
           </div>
         </CardHeader>
         <CollapsibleContent>

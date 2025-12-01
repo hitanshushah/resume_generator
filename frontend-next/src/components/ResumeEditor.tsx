@@ -359,14 +359,14 @@ const createFullHTML = (html: string) => {
     <div className="w-full border rounded-lg overflow-y-auto bg-white dark:bg-[#212121] flex flex-col max-h-[800px]">
       {/* Toolbar */}
       <div className="sticky top-0 z-10 border-b p-2 flex flex-wrap items-center gap-2 bg-[#F9F9F9] dark:bg-[#303030]">
-        {/* Undo/Redo */}
-            <div className="flex gap-1 border-r pr-2">
+            {/* Undo/Redo */}
+            <div className="flex gap-1 border-r pr-2 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().undo().run()}
                 disabled={!editor.can().undo()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
               >
                 <Undo className="h-4 w-4" />
               </Button>
@@ -375,19 +375,19 @@ const createFullHTML = (html: string) => {
                 size="sm"
                 onClick={() => editor.chain().focus().redo().run()}
                 disabled={!editor.can().redo()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
               >
                 <Redo className="h-4 w-4" />
               </Button>
             </div>
 
             {/* Text Formatting */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <Button
                 variant={editor.isActive("bold") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBold().run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Bold"
               >
                 <Bold className="h-4 w-4" />
@@ -396,7 +396,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("italic") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleItalic().run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Italic"
               >
                 <Italic className="h-4 w-4" />
@@ -405,7 +405,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("underline") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Underline"
               >
                 <UnderlineIcon className="h-4 w-4" />
@@ -413,12 +413,12 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Headings */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <Button
                 variant={editor.isActive("heading", { level: 1 }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Heading 1"
               >
                 <Heading1 className="h-4 w-4" />
@@ -427,7 +427,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Heading 2"
               >
                 <Heading2 className="h-4 w-4" />
@@ -436,7 +436,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("heading", { level: 3 }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Heading 3"
               >
                 <Heading3 className="h-4 w-4" />
@@ -444,12 +444,12 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Lists */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <Button
                 variant={editor.isActive("bulletList") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Bullet List"
               >
                 <List className="h-4 w-4" />
@@ -458,7 +458,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("orderedList") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Numbered List"
               >
                 <ListOrdered className="h-4 w-4" />
@@ -466,12 +466,12 @@ const createFullHTML = (html: string) => {
             </div>
 
                         {/* Alignment */}
-                        <div className="flex gap-1 border-r pr-2 items-center">
+                        <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <Button
                 variant={editor.isActive({ textAlign: "left" }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign("left").run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Align Left"
               >
                 <AlignLeft className="h-4 w-4" />
@@ -480,7 +480,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive({ textAlign: "center" }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign("center").run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Align Center"
               >
                 <AlignCenter className="h-4 w-4" />
@@ -489,7 +489,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive({ textAlign: "right" }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign("right").run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Align Right"
               >
                 <AlignRight className="h-4 w-4" />
@@ -497,7 +497,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Font Size */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "default";
@@ -545,7 +545,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Font Family */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "default";
@@ -602,12 +602,12 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Horizontal Rule - Insert */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().setHorizontalRule({ width: "100%", color: "#e5e7eb", thickness: "2px" }).run()}
-                className="h-8"
+                className="h-8 w-8 sm:w-auto"
                 title="Insert Horizontal Line"
               >
                 <Minus className="h-4 w-4" />
@@ -626,7 +626,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Horizontal Rule - Select */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -655,7 +655,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Horizontal Rule - Color */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <input
                 type="color"
                 value={(() => {
@@ -700,7 +700,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Horizontal Rule - Thickness */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "2px";
@@ -749,7 +749,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Horizontal Rule - Spacing Before */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "default";
@@ -803,7 +803,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Horizontal Rule - Spacing After */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "default";
@@ -857,7 +857,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Font Color */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <input
                 type="color"
                 value={(() => {
@@ -872,7 +872,7 @@ const createFullHTML = (html: string) => {
                 onChange={(e) => {
                   editor.chain().focus().setColor(e.target.value).run();
                 }}
-                className="h-8 w-8 cursor-pointer border rounded"
+                className="h-8 w-8 cursor-pointer border rounded flex-shrink-0"
                 title="Text Color"
               />
               <Popover>
@@ -889,7 +889,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Line Height */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "default";
@@ -935,7 +935,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Paragraph/Heading Spacing Before */}
-            <div className="flex gap-1 border-r pr-2 items-center">
+            <div className="flex gap-1 border-r pr-2 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "default";
@@ -990,7 +990,7 @@ const createFullHTML = (html: string) => {
             </div>
 
             {/* Paragraph/Heading Spacing After */}
-            <div className="flex gap-1 items-center">
+            <div className="flex gap-1 items-center flex-shrink-0">
               <select
                 value={(() => {
                   if (!editor) return "default";
@@ -1050,13 +1050,13 @@ const createFullHTML = (html: string) => {
             </div>
 
         {/* Download & Import */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
         {onSaveTemplate && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleSaveTemplate}
-              className="h-8"
+              className="h-8 text-sm whitespace-nowrap"
             >
               <Save className="h-4 w-4 mr-1" />
               Save Template
@@ -1068,7 +1068,7 @@ const createFullHTML = (html: string) => {
               variant="outline"
               size="sm"
               onClick={onRestoreDefaultTemplate}
-              className="h-8"
+              className="h-8 text-sm whitespace-nowrap"
             >
               <Edit className="h-4 w-4 mr-1" />
               Restore Default Template
@@ -1079,7 +1079,7 @@ const createFullHTML = (html: string) => {
               variant="outline"
               size="sm"
               onClick={handleImportHTML}
-              className="h-8"
+              className="h-8 text-sm whitespace-nowrap"
             >
               <Upload className="h-4 w-4 mr-1" />
               Import HTML
@@ -1090,7 +1090,7 @@ const createFullHTML = (html: string) => {
             variant="outline"
             size="sm"
             onClick={downloadResume}
-            className="h-8"
+            className="h-8 text-xs sm:text-sm whitespace-nowrap"
           >
             <Download className="h-4 w-4 mr-1" />
             Download HTML
@@ -1100,7 +1100,7 @@ const createFullHTML = (html: string) => {
             variant="outline"
             size="sm"
             onClick={downloadAsPDF}
-            className="h-8"
+            className="h-8 text-xs sm:text-sm whitespace-nowrap"
           >
             <Download className="h-4 w-4 mr-1" />
             Print/PDF
@@ -1116,8 +1116,8 @@ const createFullHTML = (html: string) => {
           "min-h-[500px] bg-white flex-1 dark:bg-[#212121]"
         )}
       >
-        <div className="flex justify-center w-full">
-          <div className=" shadow-xl rounded-md w-[820px] bg-white">
+        <div className="flex justify-center w-full px-2 sm:px-4">
+          <div className="shadow-xl rounded-md w-full max-w-[820px] bg-white">
             <EditorContent editor={editor} />
           </div>
         </div>

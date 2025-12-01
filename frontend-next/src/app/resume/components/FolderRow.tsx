@@ -73,49 +73,51 @@ export function FolderRow({ folderName, folder, folderKey, level = 0, onRenameFi
             )}
           </div>
         </TableCell>
-        <TableCell className="font-medium">
-          <span>
-            {folderName}
-          </span>
-          <span className="text-sm text-zinc-500 ml-2">
-            ({totalFileCount} {totalFileCount === 1 ? 'file' : 'files'})
-          </span>
+        <TableCell className="font-medium min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="truncate">{folderName}</span>
+            <span className="text-sm text-zinc-500 whitespace-nowrap">
+              ({totalFileCount} {totalFileCount === 1 ? 'file' : 'files'})
+            </span>
+            <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => {
+                    if (onRenameFolder && folderKey) {
+                      onRenameFolder(folderKey, folderName);
+                    } else {
+                      console.log('Rename folder:', folderName);
+                    }
+                  }}>
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Rename
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    variant="destructive"
+                    onClick={() => {
+                      if (onDeleteFolder && folderKey) {
+                        onDeleteFolder(folderKey, folderName, totalFileCount);
+                      } else {
+                        console.log('Delete folder:', folderName);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </TableCell>
-        <TableCell className="text-sm text-zinc-500">-</TableCell>
-        <TableCell className="w-[100px]" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => {
-                if (onRenameFolder && folderKey) {
-                  onRenameFolder(folderKey, folderName);
-                } else {
-                  console.log('Rename folder:', folderName);
-                }
-              }}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                variant="destructive"
-                onClick={() => {
-                  if (onDeleteFolder && folderKey) {
-                    onDeleteFolder(folderKey, folderName, totalFileCount);
-                  } else {
-                    console.log('Delete folder:', folderName);
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <TableCell className="text-sm text-zinc-500 hidden md:table-cell">-</TableCell>
+        <TableCell className="w-[100px] hidden md:table-cell">
         </TableCell>
       </TableRow>
       

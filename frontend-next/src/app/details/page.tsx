@@ -92,7 +92,7 @@ export default function DetailsPage() {
 
   if (loading) {
     return (
-      <div className=" mx-auto p-8 space-y-6 bg-white dark:bg-[#212121] min-h-screen">
+      <div className="mx-auto p-4 sm:p-8 space-y-6 bg-white dark:bg-[#212121] min-h-screen">
         <Skeleton className="h-32 w-full bg-gray-200 dark:bg-[#303030]" />
         <Skeleton className="h-64 w-full bg-gray-200 dark:bg-[#303030]" />
         <Skeleton className="h-64 w-full bg-gray-200 dark:bg-[#303030]" />
@@ -102,7 +102,7 @@ export default function DetailsPage() {
 
   if (error) {
     return (
-      <div className=" mx-auto p-8 bg-white dark:bg-[#212121] min-h-screen">
+      <div className="mx-auto p-4 sm:p-8 bg-white dark:bg-[#212121] min-h-screen">
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -112,7 +112,7 @@ export default function DetailsPage() {
 
   if (!data) {
     return (
-      <div className=" mx-auto p-8 bg-white dark:bg-[#212121] min-h-screen">
+      <div className="mx-auto p-4 sm:p-8 bg-white dark:bg-[#212121] min-h-screen">
         <Alert className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
           <AlertDescription className="text-gray-700 dark:text-gray-300">No data available</AlertDescription>
         </Alert>
@@ -132,59 +132,63 @@ export default function DetailsPage() {
 
 
   return (
-    <div className=" mx-auto p-8 space-y-6 bg-white dark:bg-[#212121] min-h-screen">
+    <div className="mx-auto p-4 sm:p-8 space-y-6 bg-white dark:bg-[#212121] min-h-screen">
       {/* Profile Header */}
       <Card className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <div className="flex items-start gap-6">
-            <Avatar className="w-24 h-24">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+            <Avatar className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
               {userProfile.profile_photo_url ? (
                 <AvatarImage src={userProfile.profile_photo_url} alt={userProfile.name || userProfile.username} />
               ) : null}
-              <AvatarFallback className="text-2xl bg-gray-100 dark:bg-[#404040] text-gray-900 dark:text-white">
+              <AvatarFallback className="text-xl sm:text-2xl bg-gray-100 dark:bg-[#404040] text-gray-900 dark:text-white">
                 {getInitials(userProfile.name, userProfile.username)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 space-y-2">
-              <CardTitle className="text-3xl text-gray-900 dark:text-white">{userProfile.name || userProfile.username}</CardTitle>
-              {userProfile.designation && (
-                <CardDescription className="text-lg text-gray-600 dark:text-gray-300">{userProfile.designation}</CardDescription>
-              )}
-              {userProfile.bio && <p className="text-muted-foreground dark:text-gray-300">{userProfile.bio}</p>}
+            <div className="flex-1 space-y-2 w-full min-w-0">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-2xl sm:text-3xl text-gray-900 dark:text-white break-words">{userProfile.name || userProfile.username}</CardTitle>
+                  {userProfile.designation && (
+                    <CardDescription className="text-base sm:text-lg text-gray-600 dark:text-gray-300">{userProfile.designation}</CardDescription>
+                  )}
+                </div>
+                <Button
+                  onClick={handleAddClick}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#404040] flex-shrink-0"
+                >
+                  <Pencil className="h-4 w-4 text-gray-600 dark:text-white" />
+                  <span className="hidden sm:inline">Edit</span>
+                </Button>
+              </div>
+              {userProfile.bio && <p className="text-sm sm:text-base text-muted-foreground dark:text-gray-300 break-words">{userProfile.bio}</p>}
               <div className="flex flex-wrap gap-2">
                 {userProfile.city && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.city}</Badge>}
                 {userProfile.province && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.province}</Badge>}
                 {userProfile.country && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.country}</Badge>}
               </div>
               {userProfile.links && userProfile.links.length > 0 && (
-                <div className="flex flex-wrap flex-col gap-2 pt-2 w-fit">
+                <div className="flex flex-wrap flex-col gap-2 pt-2">
                   {userProfile.links.map((link, idx) => (
                     <a
                       key={idx}
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-primary dark:text-blue-400 hover:underline"
+                      className="text-sm text-primary dark:text-blue-400 hover:underline break-all"
                     >
-                      {link.title} -{link.url}
+                      {link.title} - {link.url}
                     </a>
                   ))}
                 </div>
               )}
-              <div className="flex flex-wrap pt-2 gap-4">
-                {userProfile.email && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.email}</Badge>}
-                {userProfile.phone_number && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{userProfile.phone_number}</Badge>}
+              <div className="flex flex-wrap pt-2 gap-2 sm:gap-4">
+                {userProfile.email && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs sm:text-sm break-all">{userProfile.email}</Badge>}
+                {userProfile.phone_number && <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{userProfile.phone_number}</Badge>}
               </div>
-            </div> 
-            <Button
-                  onClick={handleAddClick}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#404040]"
-                >
-                  <Pencil className="h-4 w-4 text-gray-600 dark:text-white" />
-                  Edit
-                </Button> 
+            </div>
           </div>
         </CardHeader>
         {userProfile.introduction && (
@@ -227,14 +231,14 @@ export default function DetailsPage() {
                     </div>
                   )}
                   {project.links && project.links.length > 0 && (
-                    <div className="flex flex-col flex-wrap gap-2 w-fit">
+                    <div className="flex flex-col flex-wrap gap-2">
                       {project.links.map((link, idx) => (
                         <a
                           key={idx}
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-primary dark:text-blue-400 hover:underline"
+                          className="text-sm text-primary dark:text-blue-400 hover:underline break-all"
                         >
                           {link.title} - {link.url}
                         </a>
@@ -261,13 +265,13 @@ export default function DetailsPage() {
             {experiences.map((exp) => (
               <Card key={exp.id} className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-gray-900 dark:text-white">{exp.role}</CardTitle>
-                      <CardDescription className="mt-1 text-gray-600 dark:text-gray-300">{exp.company_name}</CardDescription>
-                      {exp.location && <CardDescription className="text-gray-600 dark:text-gray-300">{exp.location}</CardDescription>}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-gray-900 dark:text-white break-words">{exp.role}</CardTitle>
+                      <CardDescription className="mt-1 text-gray-600 dark:text-gray-300 break-words">{exp.company_name}</CardDescription>
+                      {exp.location && <CardDescription className="text-gray-600 dark:text-gray-300 break-words">{exp.location}</CardDescription>}
                     </div>
-                    <div className="text-sm text-muted-foreground dark:text-gray-300">
+                    <div className="text-sm text-muted-foreground dark:text-gray-300 whitespace-nowrap flex-shrink-0">
                       {formatDate(exp.start_date)} - {formatDate(exp.end_date)}
                     </div>
                   </div>
@@ -303,14 +307,14 @@ export default function DetailsPage() {
             {education.map((edu) => (
               <Card key={edu.id} className="bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-gray-900 dark:text-white">{edu.degree}</CardTitle>
-                      <CardDescription className="mt-1 text-gray-600 dark:text-gray-300">{edu.university_name}</CardDescription>
-                      {edu.location && <CardDescription className="text-gray-600 dark:text-gray-300">{edu.location}</CardDescription>}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-gray-900 dark:text-white break-words">{edu.degree}</CardTitle>
+                      <CardDescription className="mt-1 text-gray-600 dark:text-gray-300 break-words">{edu.university_name}</CardDescription>
+                      {edu.location && <CardDescription className="text-gray-600 dark:text-gray-300 break-words">{edu.location}</CardDescription>}
                       {edu.cgpa && <CardDescription className="text-gray-600 dark:text-gray-300">Grade: {edu.cgpa}</CardDescription>}
                     </div>
-                    <div className="text-sm text-muted-foreground dark:text-gray-300">
+                    <div className="text-sm text-muted-foreground dark:text-gray-300 whitespace-nowrap flex-shrink-0">
                       {formatDate(edu.from_date)} - {formatDate(edu.end_date)}
                     </div>
                   </div>
@@ -351,10 +355,10 @@ export default function DetailsPage() {
                     <div className="space-y-3 pl-4">
                       {groupedSkills[categoryName].map((skill) => (
                         <div key={skill.id} className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-900 dark:text-white">{skill.name}</span>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                            <span className="font-medium text-gray-900 dark:text-white break-words">{skill.name}</span>
                             {skill.proficiency_level && (
-                              <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">{skill.proficiency_level}</Badge>
+                              <Badge variant="outline" className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 w-fit">{skill.proficiency_level}</Badge>
                             )}
                           </div>
                           {skill.description && (
@@ -450,7 +454,7 @@ export default function DetailsPage() {
                     href={pub.paper_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-primary dark:text-blue-400 hover:underline"
+                    className="text-sm text-primary dark:text-blue-400 hover:underline break-all"
                   >
                     Paper Link - {pub.paper_link}
                   </a>
