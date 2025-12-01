@@ -54,7 +54,7 @@ export function UploadFileDialog({
     }
   }, [open]);
 
-  // Get all folder paths for selector (include root option)
+
   const getAllFolderPaths = (
     folderStructure: { [key: string]: FolderStructure },
     parentPath: string = ""
@@ -85,7 +85,7 @@ export function UploadFileDialog({
     setSelectedFile(file);
     setError(null);
 
-    // Validate file type
+
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     const allowedExtensions = ['.pdf', '.doc', '.docx'];
     const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
@@ -95,7 +95,7 @@ export function UploadFileDialog({
       return;
     }
 
-    // Validate file size (max 10MB)
+
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       setError("File size too large. Maximum size is 10MB.");
@@ -111,7 +111,7 @@ export function UploadFileDialog({
 
     setError(null);
     
-    // Convert "root" to empty string for backend
+
     const folderPath = selectedFolderPath === "root" ? "" : selectedFolderPath;
     
     try {
@@ -123,7 +123,7 @@ export function UploadFileDialog({
       }
       onOpenChange(false);
     } catch (err) {
-      // Error is handled by parent component
+
       console.error("Upload error:", err);
     }
   };

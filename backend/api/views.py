@@ -24,7 +24,7 @@ def get_users(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT id, username, email FROM users")
         rows = cursor.fetchall()
-        # Convert rows to list of dicts
+
         users_list = [
             {"id": row[0], "username": row[1], "email": row[2]} 
             for row in rows
@@ -136,17 +136,17 @@ def chat(request):
         ollama_port = os.getenv('OLLAMA_PORT')
         ollama_model = os.getenv('OLLAMA_MODEL')
         
-        # Build Ollama API URL
+
         ollama_url = f"http://{ollama_host}:{ollama_port}/api/generate"
         
-        # Prepare request to Ollama
+
         ollama_payload = {
             'model': ollama_model,
             'prompt': message,
             'stream': False
         }
         
-        # Make request to Ollama
+
         try:
             ollama_response = requests.post(
                 ollama_url,

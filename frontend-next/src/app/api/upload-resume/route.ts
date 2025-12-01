@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
 
-    // Validate required fields
+
     const file = formData.get('file') as File | null;
     const user_id = formData.get('user_id') as string | null;
 
@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get folder_path if provided
+
     const folder_path = formData.get('folder_path') as string | null;
 
-    // Forward the form data to backend
+
     const backendFormData = new FormData();
     backendFormData.append('file', file);
     backendFormData.append('user_id', user_id);

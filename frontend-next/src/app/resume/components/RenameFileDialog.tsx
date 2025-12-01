@@ -32,7 +32,7 @@ export function RenameFileDialog({
 
   useEffect(() => {
     if (open) {
-      // Extract filename without extension for easier editing
+
       const nameWithoutExt = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
       setNewFilename(nameWithoutExt);
       setError(null);
@@ -45,7 +45,7 @@ export function RenameFileDialog({
       return;
     }
 
-    // Get the original file extension
+
     const fileExtension = currentFilename.substring(currentFilename.lastIndexOf('.')) || '';
     const finalFilename = newFilename.trim() + fileExtension;
 
@@ -55,7 +55,7 @@ export function RenameFileDialog({
       await onRename(finalFilename);
       onOpenChange(false);
     } catch (err) {
-      // Error is handled by parent component
+
       console.error("Rename error:", err);
     }
   };

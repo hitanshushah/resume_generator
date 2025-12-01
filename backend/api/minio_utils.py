@@ -3,14 +3,14 @@ from minio import Minio
 from minio.error import S3Error
 
 
-# MinIO configuration from environment variables
+
 MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
 MINIO_PUBLIC_URL = os.getenv('MINIO_PUBLIC_URL')
 MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'resumes')
 MINIO_REGION = os.getenv('MINIO_REGION', 'us-east-1')
 MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
 MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY')
-# Default to false for SSL (most MinIO instances, especially in Docker, don't use SSL by default)
+
 MINIO_USE_SSL_STR = os.getenv('MINIO_USE_SSL', 'false').lower()
 MINIO_USE_SSL = MINIO_USE_SSL_STR in ('true', '1', 'yes')
 
@@ -24,7 +24,7 @@ def parse_endpoint(endpoint: str):
     parts = clean_endpoint.split(':')
     host = parts[0] if parts and parts[0] else 'localhost'
     
-    # Default port based on SSL
+
     default_port = 443 if MINIO_USE_SSL else 9000
     port = int(parts[1]) if len(parts) > 1 and parts[1] else default_port
     
@@ -35,17 +35,17 @@ def get_minio_client():
     """Get or create MinIO client"""
     if not MINIO_ENDPOINT:
         raise Exception('MINIO_ENDPOINT environment variable is not set')
-    # if not MINIO_ACCESS_KEY or not MINIO_SECRET_KEY:
-    #     raise Exception('MINIO_ACCESS_KEY and MINIO_SECRET_KEY environment variables are required')
+
+
     
     host, port = parse_endpoint(MINIO_ENDPOINT)
     if not host:
         raise Exception('Failed to parse MINIO_ENDPOINT')
     
-    # MinIO client expects endpoint as "host:port" or just "host"
+
     endpoint = f"{host}:{port}" if port else host
     
-    # Log configuration for debugging
+
     print(f'MinIO Configuration: endpoint={endpoint}, secure={MINIO_USE_SSL}, bucket={MINIO_BUCKET}')
     
     return Minio(
@@ -54,7 +54,7 @@ def get_minio_client():
     )
 
 
-# Initialize client lazily
+
 minio_client = None
 
 
@@ -94,10 +94,10 @@ def upload_file(bucket_name: str, object_name: str, file_data: bytes, content_ty
         minio_client = get_minio_client()
     
     try:
-        # Ensure bucket exists
+
         ensure_bucket_exists(bucket_name)
         
-        # Upload file
+
         from io import BytesIO
         file_buffer = BytesIO(file_data)
         
@@ -141,7 +141,7 @@ def download_file(bucket_name: str, object_name: str) -> bytes:
     try:
         from io import BytesIO
         
-        # Get object from MinIO
+
         response = minio_client.get_object(bucket_name, object_name)
         file_data = response.read()
         response.close()

@@ -10,7 +10,7 @@ def get_user_details(request, user_id):
     Get comprehensive user details including profile, projects, certifications, etc.
     """
     try:
-        # Validate user_id
+
         try:
             user_id_int = int(user_id)
         except (ValueError, TypeError):
@@ -19,7 +19,7 @@ def get_user_details(request, user_id):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Get user details using helper function
+
         user_details = get_user_details_data(user_id_int)
         
         if not user_details:

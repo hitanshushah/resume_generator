@@ -20,7 +20,7 @@ import { Pencil } from "lucide-react";
 export default function DetailsPage() {
   const { user, loading: userLoading } = useUser();
   const { user: storeUser } = useUserStore();
-  // Fallback to store user if context user is not available
+
   const currentUser = user || storeUser;
   const [data, setData] = useState<UserDetailsData | null>(null);
   const [loading, setLoading] = useState(true);

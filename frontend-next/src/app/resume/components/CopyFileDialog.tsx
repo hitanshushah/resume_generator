@@ -50,7 +50,7 @@ export function CopyFileDialog({
     }
   }, [open]);
 
-  // Get all folder paths for selector (include root option)
+
   const getAllFolderPaths = (
     folderStructure: { [key: string]: FolderStructure },
     parentPath: string = ""
@@ -77,7 +77,7 @@ export function CopyFileDialog({
   const handleCopy = async () => {
     setError(null);
     
-    // Convert "root" to empty string for backend
+
     const folderPath = selectedFolderPath === "root" ? "" : selectedFolderPath;
     
     try {
@@ -85,7 +85,7 @@ export function CopyFileDialog({
       setSelectedFolderPath("root");
       onOpenChange(false);
     } catch (err) {
-      // Error is handled by parent component
+
       console.error("Copy error:", err);
     }
   };

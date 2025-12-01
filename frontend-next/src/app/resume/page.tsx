@@ -41,7 +41,7 @@ interface ResumesData {
 export default function ResumePage() {
   const { user } = useUser();
   const { user: storeUser } = useUserStore();
-  // Fallback to store user if context user is not available
+
   const currentUser = user || storeUser;
   const [uploadingResume, setUploadingResume] = useState(false);
   const [creatingFolder, setCreatingFolder] = useState(false);
@@ -132,7 +132,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('Resume uploaded successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to upload resume";
@@ -175,7 +175,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('Folder created successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create folder";
@@ -218,7 +218,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('File renamed successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to rename file";
@@ -265,7 +265,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('File deleted successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to delete file";
@@ -313,7 +313,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('File copied successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to copy file";
@@ -361,7 +361,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('File moved successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to move file";
@@ -409,7 +409,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('Folder renamed successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to rename folder";
@@ -456,7 +456,7 @@ export default function ResumePage() {
       const data = await response.json();
       toast.success('Folder deleted successfully!');
       
-      // Refresh the resumes list
+
       await fetchResumes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to delete folder";

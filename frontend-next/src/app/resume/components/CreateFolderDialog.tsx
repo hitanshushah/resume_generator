@@ -52,7 +52,7 @@ export function CreateFolderDialog({
     }
   }, [open]);
 
-  // Get all folder paths for selector
+
   const getAllFolderPaths = (
     folderStructure: { [key: string]: FolderStructure },
     parentPath: string = ""
@@ -82,7 +82,7 @@ export function CreateFolderDialog({
       return;
     }
 
-    // Validate folder name (no special characters except - and _)
+
     const folderNameRegex = /^[a-zA-Z0-9_-]+$/;
     if (!folderNameRegex.test(folderName.trim())) {
       setError("Folder name can only contain letters, numbers, hyphens, and underscores");
@@ -98,7 +98,7 @@ export function CreateFolderDialog({
       setSelectedParentPath("root");
       onOpenChange(false);
     } catch (err) {
-      // Error is handled by parent component
+
     }
   };
 

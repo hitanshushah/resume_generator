@@ -43,7 +43,7 @@ export function RenameFolderDialog({
       return;
     }
 
-    // Validate folder name (only letters, numbers, hyphens, and underscores)
+
     if (!/^[a-zA-Z0-9_-]+$/.test(newFolderName.trim())) {
       setError("Folder name can only contain letters, numbers, hyphens, and underscores");
       return;
@@ -55,7 +55,7 @@ export function RenameFolderDialog({
       await onRename(newFolderName.trim());
       onOpenChange(false);
     } catch (err) {
-      // Error is handled by parent component
+
       console.error("Rename error:", err);
     }
   };

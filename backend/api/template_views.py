@@ -21,7 +21,7 @@ def save_template(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validate user_id
+
         try:
             user_id_int = int(user_id)
         except (ValueError, TypeError):
@@ -31,7 +31,7 @@ def save_template(request):
             )
 
         with connection.cursor() as cursor:
-            # Check if user exists
+
             cursor.execute("SELECT id FROM users WHERE id = %s", [user_id_int])
             user_row = cursor.fetchone()
             
@@ -41,7 +41,7 @@ def save_template(request):
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-            # Get profile_id from profiles table
+
             cursor.execute(
                 "SELECT id FROM profiles WHERE user_id = %s LIMIT 1",
                 [user_id_int]
@@ -56,10 +56,10 @@ def save_template(request):
 
             profile_id = profile_row[0]
 
-            # Convert template to JSONB
+
             template_jsonb = json.dumps(template)
 
-            # Update the resume_template column in profiles table
+
             cursor.execute(
                 """
                 UPDATE profiles 
@@ -100,7 +100,7 @@ def restore_default_template(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validate user_id
+
         try:
             user_id_int = int(user_id)
         except (ValueError, TypeError):
@@ -110,7 +110,7 @@ def restore_default_template(request):
             )
 
         with connection.cursor() as cursor:
-            # Check if user exists
+
             cursor.execute("SELECT id FROM users WHERE id = %s", [user_id_int])
             user_row = cursor.fetchone()
             
@@ -120,7 +120,7 @@ def restore_default_template(request):
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-            # Get profile_id from profiles table
+
             cursor.execute(
                 "SELECT id FROM profiles WHERE user_id = %s LIMIT 1",
                 [user_id_int]
@@ -135,7 +135,7 @@ def restore_default_template(request):
 
             profile_id = profile_row[0]
 
-            # Set resume_template to NULL
+
             cursor.execute(
                 """
                 UPDATE profiles 

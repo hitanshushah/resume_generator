@@ -9,14 +9,14 @@ def get_user_details_data(user_id_int):
     Returns the user details dictionary or None if user doesn't exist.
     """
     with connection.cursor() as cursor:
-        # First, check if user exists
+
         cursor.execute("SELECT id FROM users WHERE id = %s", [user_id_int])
         user_row = cursor.fetchone()
         
         if not user_row:
             return None
 
-        # Execute the comprehensive SQL query
+
         sql_query = """
             WITH user_profile AS (
                 SELECT 
@@ -262,7 +262,7 @@ def get_user_details_data(user_id_int):
             ) AS result;
         """
 
-        # Execute query with user_id parameter (used 12 times in the query)
+
         cursor.execute(sql_query, [user_id_int] * 12)
         
         row = cursor.fetchone()
@@ -270,10 +270,10 @@ def get_user_details_data(user_id_int):
         if not row or not row[0]:
             return None
 
-        # Parse the JSONB result
+
         result_data = row[0]
         
-        # If result_data is a string, parse it as JSON
+
         if isinstance(result_data, str):
             result_data = json.loads(result_data)
         
@@ -288,7 +288,7 @@ def prepare_resume_sections(user_details, prompt, job_description):
     """
     sections = []
     
-    # Section 1: Summary (from bio and introduction)
+
     profile_data = user_details.get('userProfile', {})
     bio = profile_data.get('bio', '')
     introduction = profile_data.get('introduction', '')
@@ -324,10 +324,10 @@ REQUIREMENTS:
 - Output ONLY the summary text, no headings or extra formatting"""
     })
     
-    # Section 2: Experiences - Process one by one
+
     if user_details.get('experiences'):
         experiences = user_details.get('experiences', [])
-        # Create a separate section for each experience
+
         for idx, experience in enumerate(experiences):
             company_name = experience.get('company_name', '')
             role = experience.get('role', '')
@@ -365,10 +365,10 @@ REQUIREMENTS:
 - Output ONLY the description points, one per line, nothing else"""
             })
     
-    # Section 3: Projects - Process one by one
+
     if user_details.get('projects'):
         projects = user_details.get('projects', [])
-        # Create a separate section for each project
+
         for idx, project in enumerate(projects):
             project_name = project.get('name', '')
             original_description = project.get('description', '')

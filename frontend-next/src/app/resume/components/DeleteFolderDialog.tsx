@@ -33,7 +33,7 @@ export function DeleteFolderDialog({
       await onDelete();
       onOpenChange(false);
     } catch (err) {
-      // Error is handled by parent component
+
       console.error("Delete error:", err);
     }
   };
