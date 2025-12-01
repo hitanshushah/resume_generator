@@ -321,7 +321,8 @@ REQUIREMENTS:
 - Use keywords and language from the job description while maintaining the user's actual background
 - Keep it concise and impactful (max 3 lines)
 - Do NOT add any information that is not in the provided bio or introduction
-- Output ONLY the summary text, no headings or extra formatting"""
+- DO NOT include any introductory phrase such as "Here is" or "The summary is"
+- Start the summary immediately with the first sentence, with no leading text"""
     })
     
 
@@ -362,8 +363,8 @@ REQUIREMENTS:
 - Format: Each point on a new line, where each point is maximum 2 lines long
 - Do NOT include company name, job title, location, dates, or technologies
 - Do NOT create or invent any experiences
-- Do NOT create or invent any information not in the original description
-- Output ONLY the description points, one per line, nothing else"""
+- DO NOT include any introductory phrase like "Here is" or "The description is"
+- Start the output immediately with the first description point"""
             })
     
 
@@ -411,6 +412,8 @@ REQUIREMENTS:
 - Each point should be NOT more than 2 lines (not in one paragraph)
 - Format: Each point on a new line, where each point is maximum 2 lines long
 - Do NOT include project name, technologies, links, or dates
+- DO NOT include any introductory phrase like "Here is" or "The description is"
+- Start the output immediately with the first description point
 - Output ONLY the description points, one per line, nothing else"""
             })
     

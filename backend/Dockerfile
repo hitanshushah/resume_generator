@@ -34,5 +34,5 @@ EXPOSE ${BACKEND_PORT}
 # Set entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-# Run gunicorn
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${BACKEND_PORT} --workers 3 resume_generator.wsgi:application"]
+# Run gunicorn with increased timeout for long-running Ollama requests
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${BACKEND_PORT} --workers 3 --timeout 600 --graceful-timeout 30 resume_generator.wsgi:application"]
