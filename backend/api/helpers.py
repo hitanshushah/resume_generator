@@ -361,6 +361,7 @@ REQUIREMENTS:
 - Generate response in new lines with one point per line
 - Output must be in separate lines (newline-separated: \n), NOT bullet points.
 - Each point should be NOT more than 2 lines (not in one paragraph)
+- Include a maximum of 6 points only (choose the most impactful ones for high ATS score)
 - Format: Each point on a new line, where each point is maximum 2 lines long
 - Do NOT include company name, job title, location, dates, or technologies
 - Do NOT create or invent any experiences
@@ -411,6 +412,7 @@ REQUIREMENTS:
 - Output must be in separate lines (newline-separated: \n), NOT bullet points.
 - Generate response in new lines with one point per line
 - Each point should be NOT more than 2 lines (not in one paragraph)
+- Include a maximum of 6 points only (choose the most impactful ones for high ATS score)
 - Format: Each point on a new line, where each point is maximum 2 lines long
 - Do NOT include project name, technologies, links, or dates
 - DO NOT include any introductory phrase like "Here is" or "The description is"
