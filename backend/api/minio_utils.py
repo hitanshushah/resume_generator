@@ -35,8 +35,12 @@ def get_minio_client():
     """Get or create MinIO client"""
     if not MINIO_ENDPOINT:
         raise Exception('MINIO_ENDPOINT environment variable is not set')
-
-
+    
+    if not MINIO_ACCESS_KEY:
+        raise Exception('MINIO_ACCESS_KEY environment variable is not set')
+    
+    if not MINIO_SECRET_KEY:
+        raise Exception('MINIO_SECRET_KEY environment variable is not set')
     
     host, port = parse_endpoint(MINIO_ENDPOINT)
     if not host:
@@ -48,10 +52,16 @@ def get_minio_client():
 
     print(f'MinIO Configuration: endpoint={endpoint}, secure={MINIO_USE_SSL}, bucket={MINIO_BUCKET}')
     
-    return Minio(
-        endpoint=endpoint,
-        secure=MINIO_USE_SSL
-    )
+    try:
+        return Minio(
+            endpoint=endpoint,
+            access_key=MINIO_ACCESS_KEY,
+            secret_key=MINIO_SECRET_KEY,
+            secure=MINIO_USE_SSL
+        )
+    except Exception as e:
+        print(f'Error creating MinIO client: {e}')
+        raise
 
 
 
