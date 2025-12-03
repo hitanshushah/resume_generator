@@ -8,7 +8,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ sectionName }: EmptyStateProps) {
   const handleAddClick = () => {
-    const url = process.env.NEXT_PUBLIC_WEBBSTYLE_URL;
+    const url = process.env.NEXT_PUBLIC_WEBBSTYLE_URL || "https://admin.webbstyle.com/pricing";
     if (url) {
       window.open(url, "_blank", "noopener,noreferrer");
     }

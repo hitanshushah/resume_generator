@@ -124,7 +124,7 @@ export default function DetailsPage() {
 
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = process.env.NEXT_PUBLIC_WEBBSTYLE_URL;
+    const url = process.env.NEXT_PUBLIC_WEBBSTYLE_URL || "https://admin.webbstyle.com/pricing";
     if (url) {
       window.open(url, "_blank", "noopener,noreferrer");
     }

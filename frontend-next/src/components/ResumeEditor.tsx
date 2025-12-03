@@ -366,7 +366,7 @@ const createFullHTML = (html: string) => {
                 size="sm"
                 onClick={() => editor.chain().focus().undo().run()}
                 disabled={!editor.can().undo()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
               >
                 <Undo className="h-4 w-4" />
               </Button>
@@ -375,7 +375,7 @@ const createFullHTML = (html: string) => {
                 size="sm"
                 onClick={() => editor.chain().focus().redo().run()}
                 disabled={!editor.can().redo()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
               >
                 <Redo className="h-4 w-4" />
               </Button>
@@ -387,7 +387,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("bold") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBold().run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Bold"
               >
                 <Bold className="h-4 w-4" />
@@ -396,7 +396,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("italic") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleItalic().run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Italic"
               >
                 <Italic className="h-4 w-4" />
@@ -405,7 +405,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("underline") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Underline"
               >
                 <UnderlineIcon className="h-4 w-4" />
@@ -418,7 +418,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("heading", { level: 1 }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Heading 1"
               >
                 <Heading1 className="h-4 w-4" />
@@ -427,7 +427,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Heading 2"
               >
                 <Heading2 className="h-4 w-4" />
@@ -436,7 +436,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("heading", { level: 3 }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Heading 3"
               >
                 <Heading3 className="h-4 w-4" />
@@ -449,7 +449,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("bulletList") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Bullet List"
               >
                 <List className="h-4 w-4" />
@@ -458,7 +458,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive("orderedList") ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Numbered List"
               >
                 <ListOrdered className="h-4 w-4" />
@@ -471,7 +471,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive({ textAlign: "left" }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign("left").run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Align Left"
               >
                 <AlignLeft className="h-4 w-4" />
@@ -480,7 +480,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive({ textAlign: "center" }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign("center").run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Align Center"
               >
                 <AlignCenter className="h-4 w-4" />
@@ -489,7 +489,7 @@ const createFullHTML = (html: string) => {
                 variant={editor.isActive({ textAlign: "right" }) ? "default" : "ghost"}
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign("right").run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Align Right"
               >
                 <AlignRight className="h-4 w-4" />
@@ -607,7 +607,7 @@ const createFullHTML = (html: string) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().setHorizontalRule({ width: "100%", color: "#e5e7eb", thickness: "2px" }).run()}
-                className="h-8 w-8 sm:w-auto"
+                className="h-8 w-8 sm:w-auto dark:text-white"
                 title="Insert Horizontal Line"
               >
                 <Minus className="h-4 w-4" />
@@ -636,7 +636,7 @@ const createFullHTML = (html: string) => {
                     alert("No horizontal line found nearby. Please click on a line first.");
                   }
                 }}
-                className="h-8 px-2 text-xs"
+                className="h-8 px-2 text-xs dark:text-white"
                 title="Select Line"
               >
                 Select
@@ -1056,7 +1056,7 @@ const createFullHTML = (html: string) => {
               variant="outline"
               size="sm"
               onClick={handleSaveTemplate}
-              className="h-8 text-sm whitespace-nowrap"
+              className="h-8 text-sm whitespace-nowrap dark:text-white dark:bg-[#212121] dark:border-zinc-700"
             >
               <Save className="h-4 w-4 mr-1" />
               Save Template
@@ -1068,7 +1068,7 @@ const createFullHTML = (html: string) => {
               variant="outline"
               size="sm"
               onClick={onRestoreDefaultTemplate}
-              className="h-8 text-sm whitespace-nowrap"
+              className="h-8 text-sm whitespace-nowrap dark:text-white dark:bg-[#212121] dark:border-zinc-700"
             >
               <Edit className="h-4 w-4 mr-1" />
               Restore Default Template
@@ -1079,7 +1079,7 @@ const createFullHTML = (html: string) => {
               variant="outline"
               size="sm"
               onClick={handleImportHTML}
-              className="h-8 text-sm whitespace-nowrap"
+              className="h-8 text-sm whitespace-nowrap dark:text-white dark:bg-[#212121] dark:border-zinc-700"
             >
               <Upload className="h-4 w-4 mr-1" />
               Import HTML
@@ -1090,7 +1090,7 @@ const createFullHTML = (html: string) => {
             variant="outline"
             size="sm"
             onClick={downloadResume}
-            className="h-8 text-xs sm:text-sm whitespace-nowrap"
+            className="h-8 text-xs sm:text-sm whitespace-nowrap dark:text-white dark:bg-[#212121] dark:border-zinc-700"
           >
             <Download className="h-4 w-4 mr-1" />
             Download HTML
@@ -1100,7 +1100,7 @@ const createFullHTML = (html: string) => {
             variant="outline"
             size="sm"
             onClick={downloadAsPDF}
-            className="h-8 text-xs sm:text-sm whitespace-nowrap"
+            className="h-8 text-xs sm:text-sm whitespace-nowrap dark:text-white dark:bg-[#212121] dark:border-zinc-700"
           >
             <Download className="h-4 w-4 mr-1" />
             Print/PDF

@@ -177,7 +177,7 @@ def get_user_details_data(user_id_int):
                             'description', e.description,
                             'skills', e.skills,
                             'location', e.location
-                        )
+                        ) ORDER BY (e.end_date IS NULL) DESC, e.end_date DESC
                     ), '[]'::jsonb)
                     FROM experiences e
                     JOIN profiles p ON e.profile_id = p.id
@@ -233,7 +233,7 @@ def get_user_details_data(user_id_int):
                             'end_date', e.end_date,
                             'location', e.location,
                             'cgpa', e.cgpa
-                        )
+                        ) ORDER BY (e.end_date IS NULL) DESC, e.end_date DESC
                     ), '[]'::jsonb)
                     FROM education e
                     JOIN profiles p ON e.profile_id = p.id
@@ -361,7 +361,7 @@ REQUIREMENTS:
 - Generate response in new lines with one point per line
 - Output must be in separate lines (newline-separated: \n), NOT bullet points.
 - Each point should be NOT more than 2 lines (not in one paragraph)
-- Include a maximum of 6 points only (choose the most impactful ones for high ATS score)
+- DO NOT return more than 6 points (choose the most impactful ones for high ATS score)
 - Format: Each point on a new line, where each point is maximum 2 lines long
 - Do NOT include company name, job title, location, dates, or technologies
 - Do NOT create or invent any experiences
@@ -397,24 +397,21 @@ Original Description: {original_description}
 Task: Generate a professional description for this project that aligns with the job description.
 
 REQUIREMENTS:
-- Maintain similar level of detail as the original description
-- Keep the SAME structure, format, and length for each project entry
+Rewrite the original project description to improve clarity, impact, and readability
+- Use keywords and terminology from the job description where applicable
+- Maintain the actual context, results, and achievements of the project
 - Keep the EXACT project names, dates, categories, and links unchanged
-- ONLY modify:
-  * Technologies mentioned - replace with job description terminology where applicable
-  * Keywords and wordings in descriptions - align with job description language
-  * Project descriptions - use job description terminology while maintaining actual project details
-- Maintain the same level of detail and number of bullet points as the original
+- Maintain the same level of detail and number of bullet points as the original project description
 - Use what the user data has stored - just change words, tech, and keywords to match job description
+- Do NOT return the job description back rewrite the project description only
 - Do NOT add or remove projects
 - Do NOT change the structure or format
 - Do NOT create, invent, or generate any projects that are not in the user's actual project list
 - Output must be in separate lines (newline-separated: \n), NOT bullet points.
 - Generate response in new lines with one point per line
 - Each point should be NOT more than 2 lines (not in one paragraph)
-- Include a maximum of 6 points only (choose the most impactful ones for high ATS score)
-- Format: Each point on a new line, where each point is maximum 2 lines long
-- Do NOT include project name, technologies, links, or dates
+- DO NOT return more than 6 points (choose the most impactful ones for high ATS score)
+- Format: Each point on a new line, where each point is maximum 2 lines long\
 - DO NOT include any introductory phrase like "Here is" or "The description is"
 - Start the output immediately with the first description point
 - Output ONLY the description points, one per line, nothing else"""
