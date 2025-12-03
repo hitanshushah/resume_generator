@@ -385,36 +385,40 @@ REQUIREMENTS:
                     'index': idx,
                     'project_name': project_name
                 },
-                'prompt': f"""CRITICAL: Generate ONLY the description for this project. Do NOT include project name, technologies, links, or dates.
+                'prompt': f"""CRITICAL INSTRUCTIONS: You MUST rewrite ONLY the original project description below. You MUST NOT copy, paraphrase, or include ANY content from the job description. The job description is provided ONLY for keyword reference - do NOT use its sentences, phrases, or content.
 
-Job Description:
+Job Description (FOR KEYWORD REFERENCE ONLY - DO NOT COPY FROM THIS):
 {job_description}
 
 Project Details:
 Name: {project_name}
 Original Description: {original_description}
 
-Task: Generate a professional description for this project that aligns with the job description.
+YOUR TASK:
+Rewrite the "Original Description" above to make it more professional and impactful. You MUST:
+1. Base your rewrite ONLY on the "Original Description" - preserve all facts, achievements, and context
+2. Use similar keywords/terminology from the job description (e.g., if job says "machine learning", use that term instead of "AI" if appropriate)
+3. DO NOT copy any sentences, phrases, or content from the job description
+4. DO NOT include information that is not in the original project description
+5. Maintain the same level of detail and number of points as the original
+6. Keep all technical details, results, and achievements from the original
 
-REQUIREMENTS:
-Rewrite the original project description to improve clarity, impact, and readability
-- Use keywords and terminology from the job description where applicable
-- Maintain the actual context, results, and achievements of the project
-- Keep the EXACT project names, dates, categories, and links unchanged
-- Maintain the same level of detail and number of bullet points as the original project description
-- Use what the user data has stored - just change words, tech, and keywords to match job description
-- Do NOT return the job description back rewrite the project description only
-- Do NOT add or remove projects
-- Do NOT change the structure or format
-- Do NOT create, invent, or generate any projects that are not in the user's actual project list
-- Output must be in separate lines (newline-separated: \n), NOT bullet points.
-- Generate response in new lines with one point per line
-- Each point should be NOT more than 2 lines (not in one paragraph)
-- DO NOT return more than 6 points (choose the most impactful ones for high ATS score)
-- Format: Each point on a new line, where each point is maximum 2 lines long\
+STRICT FORBIDDEN ACTIONS:
+- DO NOT copy any text from the job description
+- DO NOT paraphrase job description requirements or responsibilities
+- DO NOT include job description content in your response
+- DO NOT add information not present in the original project description
+- DO NOT include project name, technologies, links, or dates in the description
+
+OUTPUT FORMAT:
+- Output must be in separate lines (newline-separated: \n), NOT bullet points
+- Each point on a new line, where each point is maximum 2 lines long
+- DO NOT return more than 6 points (choose the most impactful ones)
 - DO NOT include any introductory phrase like "Here is" or "The description is"
-- Start the output immediately with the first description point
-- Output ONLY the description points, one per line, nothing else"""
+- Start immediately with the first description point
+- Output ONLY the rewritten description points, one per line, nothing else
+
+Remember: You are rewriting the ORIGINAL PROJECT DESCRIPTION only. The job description is for keyword reference, NOT for copying content."""
             })
     
     return sections
