@@ -302,9 +302,9 @@ def prepare_resume_sections(user_details, prompt, job_description):
             'introduction': introduction,
             'job_description': job_description
         },
-        'prompt': f"""IMPORTANT: Use ONLY the user's bio and introduction provided below. Do NOT create or invent any information.
+        'prompt': f"""CRITICAL INSTRUCTIONS: Create a professional summary using ONLY the user's bio and introduction below. The job description is provided ONLY for keyword reference - do NOT copy, paraphrase, or include ANY content from it.
 
-Job Description:
+Job Description (FOR KEYWORD REFERENCE ONLY - DO NOT COPY FROM THIS):
 {job_description}
 
 User's Bio:
@@ -313,17 +313,28 @@ User's Bio:
 User's Introduction:
 {introduction}
 
-Task: Create a professional summary by combining the user's bio and introduction.
+YOUR TASK:
+Combine the user's bio and introduction into a professional summary that:
+1. Uses ONLY information from the bio and introduction - do NOT add anything else
+2. Incorporates relevant keywords/terminology from the job description (e.g., if job mentions "cloud architecture", use that term if the user's background supports it)
+3. Aligns the language and terminology with job requirements while preserving the user's actual experience
+4. Maximum 3 lines only - keep it concise and impactful
+5. DO NOT copy any sentences, phrases, or content from the job description
+6. DO NOT include information that is not in the provided bio or introduction
 
-REQUIREMENTS:
-- Combine the user's bio and introduction into a short professional summary
-- Maximum 3 lines only
-- Reword the combined bio/introduction to align with the job description's requirements and terminology
-- Use keywords and language from the job description while maintaining the user's actual background
-- Keep it concise and impactful (max 3 lines)
-- Do NOT add any information that is not in the provided bio or introduction
+STRICT FORBIDDEN ACTIONS:
+- DO NOT copy any text from the job description
+- DO NOT paraphrase job description requirements or responsibilities
+- DO NOT include job description content in your response
+- DO NOT add information not present in the bio or introduction
 - DO NOT include any introductory phrase such as "Here is" or "The summary is"
-- Start the summary immediately with the first sentence, with no leading text"""
+
+OUTPUT FORMAT:
+- Start the summary immediately with the first sentence, with no leading text
+- Maximum 3 lines total
+- Write in a professional, impactful tone
+
+Remember: You are creating a summary from the user's bio and introduction only. The job description is for keyword reference, NOT for copying content."""
     })
     
 
@@ -343,9 +354,9 @@ REQUIREMENTS:
                     'index': idx,
                     'company_name': company_name
                 },
-                'prompt': f"""IMPORTANT: Generate ONLY the description for this work experience. Do NOT include company name, job title, location, dates, or technologies.
+                'prompt': f"""CRITICAL INSTRUCTIONS: You MUST rewrite ONLY the original work experience description below. You MUST NOT copy, paraphrase, or include ANY content from the job description. The job description is provided ONLY for keyword reference - do NOT use its sentences, phrases, or content.
 
-Job Description:
+Job Description (FOR KEYWORD REFERENCE ONLY - DO NOT COPY FROM THIS):
 {job_description}
 
 Work Experience Details:
@@ -353,20 +364,33 @@ Company: {company_name}
 Role: {role}
 Original Description: {original_description}
 
-Task: Generate a professional description for this work experience that aligns with the job description.
+YOUR TASK:
+Rewrite the "Original Description" above to make it more professional and impactful. You MUST:
+1. Base your rewrite ONLY on the "Original Description" - preserve all facts, achievements, responsibilities, and context
+2. Use similar keywords/terminology from the job description (e.g., if job says "agile methodology", use that term instead of "scrum" if appropriate)
+3. Align the language and terminology with job requirements while preserving the user's actual work experience
+4. DO NOT copy any sentences, phrases, or content from the job description
+5. DO NOT include information that is not in the original work experience description
+6. Maintain the same level of detail and number of points as the original
+7. Keep all technical details, results, achievements, and responsibilities from the original
 
-REQUIREMENTS:
-- Maintain similar level of detail as the original description
-- Use keywords and terminology from the job description
-- Generate response in new lines with one point per line
-- Output must be in separate lines (newline-separated: \n), NOT bullet points.
-- Each point should be NOT more than 2 lines (not in one paragraph)
+STRICT FORBIDDEN ACTIONS:
+- DO NOT copy any text from the job description
+- DO NOT paraphrase job description requirements or responsibilities
+- DO NOT include job description content in your response
+- DO NOT add information not present in the original work experience description
+- DO NOT include company name, job title, location, dates, or technologies in the description
+- DO NOT create or invent any experiences
+
+OUTPUT FORMAT:
+- Output must be in separate lines (newline-separated: \n), NOT bullet points
+- Each point on a new line, where each point is maximum 2 lines long
 - DO NOT return more than 6 points (choose the most impactful ones for high ATS score)
-- Format: Each point on a new line, where each point is maximum 2 lines long
-- Do NOT include company name, job title, location, dates, or technologies
-- Do NOT create or invent any experiences
 - DO NOT include any introductory phrase like "Here is" or "The description is"
-- Start the output immediately with the first description point"""
+- Start immediately with the first description point
+- Output ONLY the rewritten description points, one per line, nothing else
+
+Remember: You are rewriting the ORIGINAL WORK EXPERIENCE DESCRIPTION only. The job description is for keyword reference, NOT for copying content."""
             })
     
 
