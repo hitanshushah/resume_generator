@@ -5,7 +5,7 @@ const BACKEND_URL = process.env.SERVER_API_URL;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt, job_description, user_id } = body;
+    const { prompt, job_description, user_id, username, jwt_token } = body;
 
     if (!prompt || !job_description || !user_id) {
       return new Response(
@@ -17,16 +17,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const requestBody: any = {
+      prompt,
+      job_description,
+      user_id,
+    };
+
+    if (username) {
+      requestBody.username = username;
+    }
+    if (jwt_token) {
+      requestBody.jwt_token = jwt_token;
+    }
+
     const backendResponse = await fetch(`${BACKEND_URL}/api/generate-resume/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        prompt,
-        job_description,
-        user_id,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!backendResponse.ok) {

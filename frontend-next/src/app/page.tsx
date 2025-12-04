@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/contexts/UserContext";
+import { useUserStore } from "@/store/userStore";
 import { Progress } from "@/components/ui/progress";
 import { ResumeEditor } from "@/components/ResumeEditor";
 import { toast } from "sonner";
@@ -972,22 +973,37 @@ export default function Home() {
     abortControllerRef.current = new AbortController();
 
     try {
+      const { jwt: jwtToken, demo_count } = useUserStore.getState();
+      
+      const requestBody: any = {
+        prompt,
+        job_description: jobDescription,
+        user_id: user.id,
+      };
+      
+      if (user.username === 'demo' && jwtToken) {
+        requestBody.username = 'demo';
+        requestBody.jwt_token = jwtToken;
+      }
+      
       const response = await fetch('/api/generate-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          prompt,
-          job_description: jobDescription,
-          user_id: user.id,
-        }),
+        body: JSON.stringify(requestBody),
         signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+        if (errorData.rate_limit_exceeded || errorMessage.includes("Rate limit exceeded") || errorMessage.includes("rate limit")) {
+          toast.error("Rate limit exceeded. You have generated 5 resumes in the last hour. Please wait before generating more.");
+          setLoading(false);
+          return;
+        }
+        throw new Error(errorMessage);
       }
 
       const reader = response.body?.getReader();
@@ -1136,6 +1152,11 @@ export default function Home() {
                   message: "Resume generation completed!",
                 });
               } else if (data.type === "error") {
+                if (data.rate_limit_exceeded) {
+                  toast.error("Rate limit exceeded. You have generated 5 resumes in the last hour. Please wait before generating more.");
+                  setLoading(false);
+                  return;
+                }
                 throw new Error(data.error);
               }
             } catch (parseError) {
@@ -1148,7 +1169,12 @@ export default function Home() {
       if (err instanceof Error && err.name === "AbortError") {
         setError("Generation cancelled");
       } else {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        const errorMessage = err instanceof Error ? err.message : "An error occurred";
+        if (errorMessage.includes("Rate limit exceeded") || errorMessage.includes("rate limit")) {
+          toast.error("Rate limit exceeded. You have generated 5 resumes in the last hour. Please wait before generating more.");
+        } else {
+          setError(errorMessage);
+        }
       }
     } finally {
       setLoading(false);

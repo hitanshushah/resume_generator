@@ -20,6 +20,7 @@ import { CopyFileDialog } from "./components/CopyFileDialog";
 import { MoveFileDialog } from "./components/MoveFileDialog";
 import { RenameFolderDialog } from "./components/RenameFolderDialog";
 import { DeleteFolderDialog } from "./components/DeleteFolderDialog";
+import { SignInModal } from "@/components/SignInModal";
 
 interface ResumeFile {
   id: number;
@@ -47,6 +48,8 @@ export default function ResumePage() {
 
   const currentUser = user || storeUser;
   const isPro = currentUser?.is_pro || false;
+  const isDemoUser = currentUser?.username === 'demo';
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +75,8 @@ export default function ResumePage() {
   const [deletingFolder, setDeletingFolder] = useState(false);
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState<{folderKey: string, folderName: string, fileCount: number} | null>(null);
+  const [demoFiles, setDemoFiles] = useState<ResumeFile[]>([]);
+  const demoFilesRef = useRef<ResumeFile[]>([]);
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -80,6 +85,25 @@ export default function ResumePage() {
       setLoading(false);
     }
   }, [currentUser?.id]);
+
+  // Clear demo files on mount (demo files are temporary and don't persist)
+  useEffect(() => {
+    if (isDemoUser) {
+      setDemoFiles([]);
+    }
+  }, []); // Empty dependency array - only run on mount
+
+  // Cleanup blob URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Cleanup all blob URLs when component unmounts
+      demoFilesRef.current.forEach(file => {
+        if (file.url && file.url.startsWith('blob:')) {
+          URL.revokeObjectURL(file.url);
+        }
+      });
+    };
+  }, []); // Only run cleanup on unmount
 
   const fetchResumes = async () => {
     if (!currentUser?.id) return;
@@ -114,6 +138,40 @@ export default function ResumePage() {
       throw new Error("User not authenticated");
     }
 
+    // For demo users, store file locally only (not in database or MinIO)
+    if (isDemoUser) {
+      try {
+        setUploadingResume(true);
+        setError(null);
+
+        // Create a temporary file object for demo users
+        const demoFile: ResumeFile = {
+          id: Date.now(), // Temporary ID
+          filename: file.name,
+          url: URL.createObjectURL(file), // Create object URL for preview/download
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        // Add to demo files state
+        setDemoFiles(prev => {
+          const updated = [...prev, demoFile];
+          demoFilesRef.current = updated;
+          return updated;
+        });
+        toast.success('Resume uploaded (demo mode - will be removed on refresh)');
+        setUploadingResume(false);
+        return;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to upload resume";
+        setError(errorMessage);
+        toast.error(errorMessage);
+        setUploadingResume(false);
+        throw err;
+      }
+    }
+
+    // For non-demo users, upload to backend
     try {
       setUploadingResume(true);
       setError(null);
@@ -149,6 +207,10 @@ export default function ResumePage() {
   };
 
   const handleCreateFolder = async (folderName: string, parentPath: string) => {
+    if (isDemoUser) {
+      setShowSignInModal(true);
+      throw new Error("Demo users cannot create folders");
+    }
     if (!currentUser?.id) {
       setError("User not authenticated");
       toast.error("Please log in to create a folder");
@@ -472,13 +534,13 @@ export default function ResumePage() {
     }
   };
 
-  const handleDeleteFolderClick = (folderKey: string, folderName: string, fileCount: number) => {
+  const   handleDeleteFolderClick = (folderKey: string, folderName: string, fileCount: number) => {
     setFolderToDelete({ folderKey, folderName, fileCount });
     setDeleteFolderDialogOpen(true);
   };
 
-  // If user is not Pro, show subscription message
-  if (!isPro) {
+  // If user is not Pro (and not demo), show subscription message
+  if (!isPro && !isDemoUser) {
     return (
       <div className="mx-auto p-4 sm:p-8 dark:bg-[#212121] min-h-screen">
         <Card className="max-w-2xl mx-auto">
@@ -548,7 +610,13 @@ export default function ResumePage() {
             <span className="sm:hidden">Upload</span>
           </Button>
           <Button
-            onClick={() => setShowCreateFolderDialog(true)}
+            onClick={() => {
+              if (isDemoUser) {
+                setShowSignInModal(true);
+                return;
+              }
+              setShowCreateFolderDialog(true);
+            }}
             disabled={!currentUser?.id}
             variant="outline"
             className="gap-2"
@@ -589,15 +657,62 @@ export default function ResumePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {/* Demo files (temporary, frontend only) */}
+              {isDemoUser && demoFiles.map((file) => (
+                <FileRow 
+                  key={`demo-${file.id}`} 
+                  file={file} 
+                  onRename={() => {
+                    setShowSignInModal(true);
+                  }}
+                  onDelete={() => {
+                    // Revoke object URL to free memory
+                    if (file.url && file.url.startsWith('blob:')) {
+                      URL.revokeObjectURL(file.url);
+                    }
+                    setDemoFiles(prev => {
+                      const updated = prev.filter(f => f.id !== file.id);
+                      demoFilesRef.current = updated;
+                      return updated;
+                    });
+                    toast.success('File removed');
+                  }}
+                  onCopy={() => {
+                    setShowSignInModal(true);
+                  }}
+                  onMove={() => {
+                    setShowSignInModal(true);
+                  }}
+                />
+              ))}
+              
               {/* Root level files */}
               {resumesData.resumes.map((file) => (
                 <FileRow 
                   key={file.id} 
                   file={file} 
-                  onRename={() => handleRenameClick(file)}
+                  onRename={() => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleRenameClick(file);
+                    }
+                  }}
                   onDelete={() => handleDeleteClick(file)}
-                  onCopy={() => handleCopyClick(file)}
-                  onMove={() => handleMoveClick(file)}
+                  onCopy={() => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleCopyClick(file);
+                    }
+                  }}
+                  onMove={() => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleMoveClick(file);
+                    }
+                  }}
                 />
               ))}
 
@@ -608,16 +723,46 @@ export default function ResumePage() {
                   folderName={folderName} 
                   folder={folder}
                   folderKey={folder.folder_key}
-                  onRenameFile={(file) => handleRenameClick(file)}
+                  onRenameFile={(file) => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleRenameClick(file);
+                    }
+                  }}
                   onDeleteFile={(file) => handleDeleteClick(file)}
-                  onCopyFile={(file) => handleCopyClick(file)}
-                  onMoveFile={(file) => handleMoveClick(file)}
-                  onRenameFolder={(folderKey, currentName) => handleRenameFolderClick(folderKey, currentName)}
-                  onDeleteFolder={(folderKey, folderName, fileCount) => handleDeleteFolderClick(folderKey, folderName, fileCount)}
+                  onCopyFile={(file) => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleCopyClick(file);
+                    }
+                  }}
+                  onMoveFile={(file) => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleMoveClick(file);
+                    }
+                  }}
+                  onRenameFolder={(folderKey, currentName) => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleRenameFolderClick(folderKey, currentName);
+                    }
+                  }}
+                  onDeleteFolder={(folderKey, folderName, fileCount) => {
+                    if (isDemoUser) {
+                      setShowSignInModal(true);
+                    } else {
+                      handleDeleteFolderClick(folderKey, folderName, fileCount);
+                    }
+                  }}
                 />
               ))}
 
-              {resumesData.resumes.length === 0 && Object.keys(resumesData.folders).length === 0 && (
+              {resumesData.resumes.length === 0 && Object.keys(resumesData.folders).length === 0 && (!isDemoUser || demoFiles.length === 0) && (
                 <EmptyState
                   onUploadClick={() => setShowUploadDialog(true)}
                   uploading={uploadingResume}
@@ -628,6 +773,12 @@ export default function ResumePage() {
           </Table>
         </div>
       )}
+
+      {/* Sign In Modal */}
+      <SignInModal
+        open={showSignInModal}
+        onOpenChange={setShowSignInModal}
+      />
 
       {/* Create Folder Dialog */}
       {resumesData && (

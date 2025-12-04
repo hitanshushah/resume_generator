@@ -20,7 +20,7 @@ interface UserProviderProps {
 }
 
 export function UserProvider({ children }: UserProviderProps) {
-  const { user: storeUser, isAuthenticated, setUser: setStoreUser, clearUser: clearStoreUser } = useUserStore();
+  const { user: storeUser, isAuthenticated, setUser: setStoreUser, clearUser: clearStoreUser, setDemoData } = useUserStore();
   const [user, setUser] = useState<User | null>(storeUser);
   const [loading, setLoading] = useState<boolean>(!storeUser);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +60,10 @@ export function UserProvider({ children }: UserProviderProps) {
         });
         setStoreUser(userData);
         setUser(userData);
+        
+        if (authData.user.username === 'demo' && authData.demo_count !== undefined && authData.jwt) {
+          setDemoData(authData.demo_count, authData.jwt);
+        }
       } else {
         clearStoreUser();
         setUser(null);

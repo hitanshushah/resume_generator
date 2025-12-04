@@ -33,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { SignInModal } from "@/components/SignInModal";
 import { 
   Bold, 
   Italic, 
@@ -80,6 +81,7 @@ export function ResumeEditor({ content, onContentChange, onImportHTML, onSaveTem
   const [showProModal, setShowProModal] = useState(false);
   
   const isPro = user?.is_pro || false;
+  const isDemoUser = user?.username === 'demo';
 
   
   useEffect(() => {
@@ -289,7 +291,7 @@ const createFullHTML = (html: string) => {
   };
 
   const downloadResume = () => {
-    if (!isPro) {
+    if (isDemoUser || !isPro) {
       setShowProModal(true);
       return;
     }
@@ -309,7 +311,7 @@ const createFullHTML = (html: string) => {
   };
 
   const handleSaveTemplate = () => {
-    if (!isPro) {
+    if (isDemoUser || !isPro) {
       setShowProModal(true);
       return;
     }
@@ -317,7 +319,7 @@ const createFullHTML = (html: string) => {
   };
 
   const handleImportHTML = () => {
-    if (!isPro) {
+    if (isDemoUser || !isPro) {
       setShowProModal(true);
       return;
     }
@@ -1060,7 +1062,7 @@ const createFullHTML = (html: string) => {
             >
               <Save className="h-4 w-4 mr-1" />
               Save Template
-              {!isPro && <Sparkles className="h-3 w-3 ml-1 text-primary" />}
+              {(isDemoUser || !isPro) && <Sparkles className="h-3 w-3 ml-1 text-primary dark:text-white" />}
             </Button>
           )}
           {onRestoreDefaultTemplate && (
@@ -1083,7 +1085,7 @@ const createFullHTML = (html: string) => {
             >
               <Upload className="h-4 w-4 mr-1" />
               Import HTML
-              {!isPro && <Sparkles className="h-3 w-3 ml-1 text-primary" />}
+              {(isDemoUser || !isPro) && <Sparkles className="h-3 w-3 ml-1 text-primary dark:text-white" />}
             </Button>
           )}
           <Button
@@ -1094,7 +1096,7 @@ const createFullHTML = (html: string) => {
           >
             <Download className="h-4 w-4 mr-1" />
             Download HTML
-            {!isPro && <Sparkles className="h-3 w-3 ml-1 text-primary" />}
+            {(isDemoUser || !isPro) && <Sparkles className="h-3 w-3 ml-1 text-primary dark:text-white" />}
           </Button>
           <Button
             variant="outline"
@@ -1124,69 +1126,79 @@ const createFullHTML = (html: string) => {
 
       </div>
 
-      {/* Pro Subscription Modal */}
-      <Dialog open={showProModal} onOpenChange={setShowProModal}>
-        <DialogContent>
-          <DialogHeader>
-            <div className="flex justify-center mb-4">
-              <div className="rounded-full bg-primary/10 p-3">
-                <Lock className="h-8 w-8 text-primary" />
+      {/* Sign In Modal for Demo Users */}
+      {isDemoUser && (
+        <SignInModal
+          open={showProModal}
+          onOpenChange={setShowProModal}
+        />
+      )}
+
+      {/* Pro Subscription Modal for Non-Demo Users */}
+      {!isDemoUser && (
+        <Dialog open={showProModal} onOpenChange={setShowProModal}>
+          <DialogContent>
+            <DialogHeader>
+              <div className="flex justify-center mb-4">
+                <div className="rounded-full bg-primary/10 p-3">
+                  <Lock className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <DialogTitle className="text-center">Pro Feature Required</DialogTitle>
+              <DialogDescription className="text-center">
+                This feature is available only for Pro subscribers. Upgrade to Pro to unlock this and more features.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <p className="font-semibold text-sm">Pro Plan includes:</p>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Save custom resume template and design
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Import HTML files
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Download HTML files
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Upload files to File Storage
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Create folders
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Unlimited job descriptions generation
+                  </li>
+                </ul>
               </div>
             </div>
-            <DialogTitle className="text-center">Pro Feature Required</DialogTitle>
-            <DialogDescription className="text-center">
-              This feature is available only for Pro subscribers. Upgrade to Pro to unlock this and more features.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <p className="font-semibold text-sm">Pro Plan includes:</p>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Save custom resume template and design
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Import HTML files
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Download HTML files
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Upload files to File Storage
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Create folders
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Unlimited job descriptions generation
-                </li>
-              </ul>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowProModal(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setShowProModal(false);
-                router.push('/pricing');
-              }}
-            >
-              Subscribe to Pro
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowProModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowProModal(false);
+                  router.push('/pricing');
+                }}
+              >
+                Subscribe to Pro
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
     </div>
   );

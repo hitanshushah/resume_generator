@@ -16,7 +16,10 @@ export interface User {
 interface UserState {
   user: User | null;
   isAuthenticated: boolean;
+  demo_count: number | null;
+  jwt: string | null;
   setUser: (user: User | null) => void;
+  setDemoData: (demo_count: number | null, jwt: string | null) => void;
   clearUser: () => void;
 }
 
@@ -25,8 +28,11 @@ export const useUserStore = create<UserState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
+      demo_count: null,
+      jwt: null,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      clearUser: () => set({ user: null, isAuthenticated: false }),
+      setDemoData: (demo_count, jwt) => set({ demo_count, jwt }),
+      clearUser: () => set({ user: null, isAuthenticated: false, demo_count: null, jwt: null }),
     }),
     {
       name: 'user-storage', 
