@@ -16,6 +16,7 @@ import { CollapsibleSection } from "./components/CollapsibleSection";
 import { EmptyState } from "./components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
+import { WebbStyleModal } from "@/components/WebbStyleModal";
 
 export default function DetailsPage() {
   const { user, loading: userLoading } = useUser();
@@ -34,6 +35,7 @@ export default function DetailsPage() {
     achievements: false,
     publications: false,
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     
@@ -124,10 +126,7 @@ export default function DetailsPage() {
 
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = process.env.NEXT_PUBLIC_WEBBSTYLE_URL || "https://admin.webbstyle.com/pricing";
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+    setIsModalOpen(true);
   };
 
 
@@ -466,7 +465,9 @@ export default function DetailsPage() {
         ) : (
           <EmptyState sectionName="publication" />
         )}
-      </CollapsibleSection>
+          </CollapsibleSection>
+
+      <WebbStyleModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );
 }
