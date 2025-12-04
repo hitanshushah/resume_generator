@@ -36,7 +36,7 @@ export function Navbar() {
 
   const handleLogout = () => {
     clearUser();
-    router.push("https://resumegenerator.live/outpost.goauthentik.io/sign_out");
+    router.push("https://admin.resumegenerator.live/outpost.goauthentik.io/sign_out");
   };
 
   const navItems = [
