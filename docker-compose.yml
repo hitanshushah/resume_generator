@@ -13,6 +13,8 @@ services:
       - .env
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
   frontend:
@@ -44,4 +46,10 @@ services:
       - "${OLLAMA_PORT}:${OLLAMA_PORT}"
     mem_limit: 8g
     restart: unless-stopped
-
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
