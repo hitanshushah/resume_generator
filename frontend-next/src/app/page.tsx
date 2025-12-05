@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { ResumeEditor } from "@/components/ResumeEditor";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Info } from "lucide-react";
+import { ChevronDown, Info, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Terminal } from "lucide-react";
 
@@ -56,6 +56,24 @@ ${createSectionHeading("CERTIFICATIONS")}
 <p><span style="font-family: &quot;Times New Roman&quot;, serif;">[CERTIFICATION NAME]</span></p>
 `;
 
+const DEMO_JOB_DESCRIPTION = `We are seeking a Senior Software Developer with 5+ years of experience in architecting and building scalable, high-performance applications. The ideal candidate is proficient in modern JavaScript frameworks (Nuxt.js, Next.js, React), TypeScript, Go, and microservices-based architectures.
+
+Responsibilities:
+
+Design, develop, and optimize scalable web applications and APIs (REST & GraphQL).
+
+Lead end-to-end development of microservices and containerized systems using Docker & Kubernetes.
+
+Collaborate with cross-functional teams to enhance CI/CD pipelines and improve deployment efficiency.
+
+Mentor junior developers, enforce code quality standards, and drive architectural improvements.
+
+Build dynamic CMS platforms, custom website templates, and domain management features with Nuxt.js, Vue, Pinia, Tailwind, and PostgreSQL.
+
+Key Skills:
+
+Nuxt.js, Next.js, React, TypeScript, GoLang, Vue, TailwindCSS, PostgreSQL, Docker, Kubernetes, CI/CD, Microservices, DevOps practices.`;
+
 export default function Home() {
   const { user } = useUser();
   const [prompt, setPrompt] = useState("Refactor my resume based on the pasted job description");
@@ -69,6 +87,12 @@ export default function Home() {
   const [savedTemplate, setSavedTemplate] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isResponsesOpen, setIsResponsesOpen] = useState(false);
+
+  useEffect(() => {
+    if (user?.username === 'demo' && jobDescription === "") {
+      setJobDescription(DEMO_JOB_DESCRIPTION);
+    }
+  }, [user?.username]);
 
   
   const formatDate = (dateString: string | null | undefined): string => {
@@ -2175,18 +2199,41 @@ export default function Home() {
 
             {/* Job Description Input */}
             <div className="space-y-2">
-              <label htmlFor="job-description" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Job Description
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="job-description" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Job Description
+                </label>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {jobDescription.length} / 3500
+                </span>
+              </div>
               <Textarea
                 id="job-description"
                 placeholder="Enter job description here..."
                 value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value.length <= 3500) {
+                    setJobDescription(e.target.value);
+                  }
+                }}
+                maxLength={3500}
                 disabled={loading}
                 className="min-h-64 resize-none bg-[#F9F9F9] dark:bg-[#303030] dark:text-white dark:border-0 mt-2"
               />
             </div>
+
+            {/* Demo Mode Banner */}
+            {user?.username === 'demo' && (
+              <Alert className="bg-amber-50 dark:bg-amber-700/20 border-amber-200 dark:border-amber-800">
+                <AlertCircle className="h-4 w-4 text-amber-600 dark:!text-amber-100" />
+                <AlertTitle className="text-amber-900 dark:text-amber-100">
+                  Demo Mode
+                </AlertTitle>
+                <AlertDescription className="text-amber-800 dark:text-amber-200">
+                  Rate limited to generate 5 resumes per session in 1 hour, please sign in for unlimited access.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Generate Button */}
             <div className="flex gap-2">
