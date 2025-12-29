@@ -1,0 +1,480 @@
+from django.db import connection
+import json
+import requests
+
+
+def get_user_details_data(user_id_int):
+    """
+    Helper function to get user details data.
+    Returns the user details dictionary or None if user doesn't exist.
+    """
+    with connection.cursor() as cursor:
+
+        cursor.execute("SELECT id FROM users WHERE id = %s", [user_id_int])
+        user_row = cursor.fetchone()
+        
+        if not user_row:
+            return None
+
+
+        sql_query = """
+            WITH user_profile AS (
+                SELECT 
+                    u.id AS user_id,
+                    u.username,
+                    u.email,
+                    p.id AS profile_id,
+                    p.name,
+                    p.designation,
+                    p.bio,
+                    p.city,
+                    p.province,
+                    p.country,
+                    p.phone_number,
+                    p.secondary_email,
+                    p.introduction,
+                    p.override_email,
+                    p.website_url,
+                    p.personal_website_url,
+                    p.resume_template,
+                    -- Projects Board URL (only if share_profile is true)
+                    CASE 
+                        WHEN p.share_profile = TRUE AND p.public_url IS NOT NULL THEN p.public_url 
+                        ELSE NULL 
+                    END AS projects_board_url,
+                    -- Profile Photo
+                    (
+                        SELECT a.filename
+                        FROM assets a
+                        JOIN asset_types at ON a.asset_type_id = at.id
+                        WHERE a.assetable_id = p.id
+                          AND a.assetable_type = 'App\\Models\\Profile'
+                          AND a.display_name = 'Profile Photo'
+                          AND at.key = 'images'
+                          AND a.deleted_at IS NULL
+                        LIMIT 1
+                    ) AS profile_photo_url,
+                    -- Profile Links
+                    (
+                        SELECT COALESCE(jsonb_agg(
+                            jsonb_build_object(
+                                'title', l.name,
+                                'url', l.url,
+                                'type', lt.key
+                            )
+                        ), '[]'::jsonb)
+                        FROM links l
+                        JOIN link_types lt ON l.link_type_id = lt.id
+                        WHERE l.linkable_id = p.id
+                          AND l.linkable_type = 'App\\Models\\Profile'
+                          AND l.deleted_at IS NULL
+                    ) AS links
+                FROM users u
+                LEFT JOIN profiles p ON p.user_id = u.id
+                WHERE u.id = %s
+            )
+
+            SELECT jsonb_build_object(
+                'userProfile', (SELECT row_to_json(up) FROM user_profile up),
+
+                'projects', (
+                    SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object(
+                            'id', pr.id,
+                            'key', pr.key,
+                            'name', pr.name,
+                            'description', pr.description,
+                            'start_date', pr.start_date,
+                            'end_date', pr.end_date,
+                            'sorting_order', pr.sorting_order,
+                            'created_at', pr.created_at,
+                            'updated_at', pr.updated_at,
+                            'category', c.name,
+                            'status', s.key,
+                            -- Project Settings
+                            'settings', (
+                                SELECT row_to_json(ps)
+                                FROM project_settings ps
+                                WHERE ps.project_id = pr.id
+                                  AND ps.user_id = %s
+                            ),
+                            -- Project Links
+                            'links', (
+                                SELECT COALESCE(jsonb_agg(
+                                    jsonb_build_object(
+                                        'title', l.name,
+                                        'url', l.url,
+                                        'type', lt.key
+                                    )
+                                ), '[]'::jsonb)
+                                FROM links l
+                                JOIN link_types lt ON l.link_type_id = lt.id
+                                WHERE l.linkable_id = pr.id
+                                  AND l.linkable_type = 'App\\Models\\Project'
+                                  AND l.deleted_at IS NULL
+                            ),
+                            -- Project Tags (Technologies only)
+                            'technologies', (
+                                SELECT COALESCE(
+                                    to_jsonb(array_agg(DISTINCT value)), '[]'::jsonb
+                                )
+                                FROM tags t,
+                                     LATERAL jsonb_array_elements_text(t.name::jsonb) AS value
+                                WHERE t.project_id = pr.id
+                                  AND t.type = 'technology'
+                                  AND t.user_id = %s
+                            )
+                        )
+                        ORDER BY pr.sorting_order ASC, pr.created_at DESC
+                    ), '[]'::jsonb)
+                    FROM projects pr
+                    LEFT JOIN categories c ON pr.category_id = c.id
+                    LEFT JOIN status s ON pr.status_id = s.id
+                    WHERE pr.user_id = %s
+                      AND pr.is_public = TRUE
+                      AND pr.hide_on_website = FALSE
+                      AND pr.deleted_at IS NULL
+                ),
+
+                'certifications', (
+                    SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object(
+                            'id', c.id,
+                            'name', c.name,
+                            'description', c.description,
+                            'start_date', c.start_date,
+                            'end_date', c.end_date,
+                            'institute_name', c.institute_name
+                        )
+                    ), '[]'::jsonb)
+                    FROM certifications c
+                    JOIN profiles p ON c.profile_id = p.id
+                    WHERE p.user_id = %s
+                      AND c.deleted_at IS NULL
+                ),
+
+                'achievements', (
+                    SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object(
+                            'id', a.id,
+                            'description', a.description
+                        )
+                    ), '[]'::jsonb)
+                    FROM achievements a
+                    JOIN profiles p ON a.profile_id = p.id
+                    WHERE p.user_id = %s
+                      AND a.deleted_at IS NULL
+                ),
+
+                'experiences', (
+                    SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object(
+                            'id', e.id,
+                            'company_name', e.company_name,
+                            'role', e.role,
+                            'start_date', e.start_date,
+                            'end_date', e.end_date,
+                            'description', e.description,
+                            'skills', e.skills,
+                            'location', e.location
+                        ) ORDER BY (e.end_date IS NULL) DESC, e.end_date DESC
+                    ), '[]'::jsonb)
+                    FROM experiences e
+                    JOIN profiles p ON e.profile_id = p.id
+                    WHERE p.user_id = %s
+                      AND e.deleted_at IS NULL
+                ),
+
+                'publications', (
+                    SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object(
+                            'id', pub.id,
+                            'paper_name', pub.paper_name,
+                            'conference_name', pub.conference_name,
+                            'description', pub.description,
+                            'published_date', pub.published_date,
+                            'paper_link', pub.paper_link
+                        )
+                    ), '[]'::jsonb)
+                    FROM publications pub
+                    JOIN profiles p ON pub.profile_id = p.id
+                    WHERE p.user_id = %s
+                      AND pub.deleted_at IS NULL
+                ),
+
+                'skills', (
+                    SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object(
+                            'id', s.id,
+                            'name', s.name,
+                            'category_id', s.category_id,
+                            'category', jsonb_build_object(
+                                'id', c.id,
+                                'name', c.name,
+                                'user_id', c.user_id
+                            ),
+                            'proficiency_level', s.proficiency_level,
+                            'description', s.description
+                        )
+                    ), '[]'::jsonb)
+                    FROM skills s
+                    JOIN profiles p ON s.profile_id = p.id
+                    LEFT JOIN skill_categories c ON s.category_id = c.id
+                    WHERE p.user_id = %s
+                ),
+
+                'education', (
+                    SELECT COALESCE(jsonb_agg(
+                        jsonb_build_object(
+                            'id', e.id,
+                            'university_name', e.university_name,
+                            'degree', e.degree,
+                            'from_date', e.from_date,
+                            'end_date', e.end_date,
+                            'location', e.location,
+                            'cgpa', e.cgpa
+                        ) ORDER BY (e.end_date IS NULL) DESC, e.end_date DESC
+                    ), '[]'::jsonb)
+                    FROM education e
+                    JOIN profiles p ON e.profile_id = p.id
+                    WHERE p.user_id = %s
+                      AND e.deleted_at IS NULL
+                ),
+
+                'categories', (
+                    SELECT COALESCE(jsonb_agg(row_to_json(cats)), '[]'::jsonb)
+                    FROM (
+                        SELECT id, name, key
+                        FROM categories
+                        WHERE user_id = %s OR user_id IS NULL
+                    ) cats
+                ),
+
+                'technologies', (
+                    SELECT COALESCE(
+                        to_jsonb(array_agg(DISTINCT value)), '[]'::jsonb
+                    )
+                    FROM tags t,
+                         LATERAL jsonb_array_elements_text(t.name::jsonb) AS value
+                    WHERE t.type = 'technology'
+                      AND t.user_id = %s
+                      AND t.project_id IS NOT NULL
+                )
+            ) AS result;
+        """
+
+
+        cursor.execute(sql_query, [user_id_int] * 12)
+        
+        row = cursor.fetchone()
+        
+        if not row or not row[0]:
+            return None
+
+
+        result_data = row[0]
+        
+
+        if isinstance(result_data, str):
+            result_data = json.loads(result_data)
+        
+        return result_data
+
+
+def prepare_resume_sections(user_details, prompt, job_description):
+    """
+    Prepare user details into sections for sequential processing.
+    Returns a list of sections with their prompts.
+    Now only generates 3 sections: summary, experiences, and projects.
+    """
+    sections = []
+    
+
+    profile_data = user_details.get('userProfile', {})
+    bio = profile_data.get('bio', '')
+    introduction = profile_data.get('introduction', '')
+    
+    sections.append({
+        'section': 'summary',
+        'title': 'Professional Summary',
+        'data': {
+            'bio': bio,
+            'introduction': introduction,
+            'job_description': job_description
+        },
+        'prompt': f"""CRITICAL INSTRUCTIONS: Create a professional summary using ONLY the user's bio and introduction below. The job description is provided ONLY for keyword reference - do NOT copy, paraphrase, or include ANY content from it.
+
+Job Description (FOR KEYWORD REFERENCE ONLY - DO NOT COPY FROM THIS):
+{job_description}
+
+User's Bio:
+{bio}
+
+User's Introduction:
+{introduction}
+
+YOUR TASK:
+Combine the user's bio and introduction into a professional summary that:
+1. Uses ONLY information from the bio and introduction - do NOT add anything else
+2. Incorporates relevant keywords/terminology from the job description (e.g., if job mentions "cloud architecture", use that term if the user's background supports it)
+3. Aligns the language and terminology with job requirements while preserving the user's actual experience
+4. Maximum 3 lines only - keep it concise and impactful
+5. DO NOT copy any sentences, phrases, or content from the job description
+6. DO NOT include information that is not in the provided bio or introduction
+
+STRICT FORBIDDEN ACTIONS:
+- DO NOT copy any text from the job description
+- DO NOT paraphrase job description requirements or responsibilities
+- DO NOT include job description content in your response
+- DO NOT add information not present in the bio or introduction
+- DO NOT include any introductory phrase such as "Here is" or "The summary is"
+
+OUTPUT FORMAT:
+- Start the summary immediately with the first sentence, with no leading text
+- Maximum 3 lines total
+- Write in a professional, impactful tone
+
+Remember: You are creating a summary from the user's bio and introduction only. The job description is for keyword reference, NOT for copying content."""
+    })
+    
+
+    if user_details.get('experiences'):
+        experiences = user_details.get('experiences', [])
+
+        for idx, experience in enumerate(experiences):
+            company_name = experience.get('company_name', '')
+            role = experience.get('role', '')
+            original_description = experience.get('description', '')
+            
+            sections.append({
+                'section': 'experience',
+                'title': f'Work Experience {idx + 1}',
+                'data': {
+                    'experience': experience,
+                    'index': idx,
+                    'company_name': company_name
+                },
+                'prompt': f"""CRITICAL INSTRUCTIONS: You MUST rewrite ONLY the original work experience description below. You MUST NOT copy, paraphrase, or include ANY content from the job description. The job description is provided ONLY for keyword reference - do NOT use its sentences, phrases, or content.
+
+Job Description (FOR KEYWORD REFERENCE ONLY - DO NOT COPY FROM THIS):
+{job_description}
+
+Work Experience Details:
+Company: {company_name}
+Role: {role}
+Original Description: {original_description}
+
+YOUR TASK:
+Rewrite the "Original Description" above to make it more professional and impactful. You MUST:
+1. Base your rewrite ONLY on the "Original Description" - preserve all facts, achievements, responsibilities, and context
+2. Use similar keywords/terminology from the job description (e.g., if job says "agile methodology", use that term instead of "scrum" if appropriate)
+3. Align the language and terminology with job requirements while preserving the user's actual work experience
+4. DO NOT copy any sentences, phrases, or content from the job description
+5. DO NOT include information that is not in the original work experience description
+6. Maintain the same level of detail and number of points as the original
+7. Keep all technical details, results, achievements, and responsibilities from the original
+
+STRICT FORBIDDEN ACTIONS:
+- DO NOT copy any text from the job description
+- DO NOT paraphrase job description requirements or responsibilities
+- DO NOT include job description content in your response
+- DO NOT add information not present in the original work experience description
+- DO NOT include company name, job title, location, dates, or technologies in the description
+- DO NOT create or invent any experiences
+
+OUTPUT FORMAT:
+- Output must be in separate lines (newline-separated: \n), NOT bullet points
+- Each point on a new line, where each point is maximum 2 lines long
+- DO NOT return more than 6 points (choose the most impactful ones for high ATS score)
+- DO NOT include any introductory phrase like "Here is" or "The description is"
+- Start immediately with the first description point
+- Output ONLY the rewritten description points, one per line, nothing else
+
+Remember: You are rewriting the ORIGINAL WORK EXPERIENCE DESCRIPTION only. The job description is for keyword reference, NOT for copying content."""
+            })
+    
+
+    if user_details.get('projects'):
+        projects = user_details.get('projects', [])
+
+        for idx, project in enumerate(projects):
+            project_name = project.get('name', '')
+            original_description = project.get('description', '')
+            
+            sections.append({
+                'section': 'project',
+                'title': f'Project {idx + 1}',
+                'data': {
+                    'project': project,
+                    'index': idx,
+                    'project_name': project_name
+                },
+                'prompt': f"""CRITICAL INSTRUCTIONS: You MUST rewrite ONLY the original project description below. You MUST NOT copy, paraphrase, or include ANY content from the job description. The job description is provided ONLY for keyword reference - do NOT use its sentences, phrases, or content.
+
+Job Description (FOR KEYWORD REFERENCE ONLY - DO NOT COPY FROM THIS):
+{job_description}
+
+Project Details:
+Name: {project_name}
+Original Description: {original_description}
+
+YOUR TASK:
+Rewrite the "Original Description" above to make it more professional and impactful. You MUST:
+1. Base your rewrite ONLY on the "Original Description" - preserve all facts, achievements, and context
+2. Use similar keywords/terminology from the job description (e.g., if job says "machine learning", use that term instead of "AI" if appropriate)
+3. DO NOT copy any sentences, phrases, or content from the job description
+4. DO NOT include information that is not in the original project description
+5. Maintain the same level of detail and number of points as the original
+6. Keep all technical details, results, and achievements from the original
+
+STRICT FORBIDDEN ACTIONS:
+- DO NOT copy any text from the job description
+- DO NOT paraphrase job description requirements or responsibilities
+- DO NOT include job description content in your response
+- DO NOT add information not present in the original project description
+- DO NOT include project name, technologies, links, or dates in the description
+
+OUTPUT FORMAT:
+- Output must be in separate lines (newline-separated: \n), NOT bullet points
+- Each point on a new line, where each point is maximum 2 lines long
+- DO NOT return more than 6 points (choose the most impactful ones)
+- DO NOT include any introductory phrase like "Here is" or "The description is"
+- Start immediately with the first description point
+- Output ONLY the rewritten description points, one per line, nothing else
+
+Remember: You are rewriting the ORIGINAL PROJECT DESCRIPTION only. The job description is for keyword reference, NOT for copying content."""
+            })
+    
+    return sections
+
+
+def send_to_ollama(prompt, ollama_host, ollama_port, ollama_model, stream=False):
+    """
+    Helper function to send data to Ollama and get response.
+    This is the layer between Django and Ollama.
+    """
+    ollama_url = f"http://{ollama_host}:{ollama_port}/api/generate"
+    
+    ollama_payload = {
+        'model': ollama_model,
+        'prompt': prompt,
+        'stream': stream
+    }
+    
+    try:
+        ollama_response = requests.post(
+            ollama_url,
+            json=ollama_payload,
+            timeout=300
+        )
+        ollama_response.raise_for_status()
+        
+        if stream:
+            return ollama_response.iter_lines()
+        else:
+            ollama_data = ollama_response.json()
+            return ollama_data.get('response', '')
+            
+    except requests.exceptions.RequestException as e:
+        raise Exception(f'Failed to connect to Ollama: {str(e)}')
+

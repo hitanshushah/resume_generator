@@ -1,0 +1,137 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Check, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useUserStore } from "@/store/userStore";
+
+const plans = [
+  {
+    name: "Basic",
+    price: "Free",
+    description: "Perfect for getting started with resume building",
+    features: [
+      "Generate Resume based on Job Description",
+      "Edit resume",
+      "Print resume as PDF",
+    ],
+    popular: false,
+  },
+  {
+    name: "Pro",
+    price: "$4.99",
+    pricePeriod: "/month",
+    description: "For professionals who need unlimited access",
+    features: [
+      "Everything in Basic",
+      "Save custom resume template and design",
+      "Import and export resume as HTML",
+      "Upload files to File Storage",
+      "Create folders",
+    ],
+    popular: true,
+  },
+];
+
+export default function PricingPage() {
+  const { user } = useUserStore();
+  const isPro = user?.is_pro ?? false;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 dark:from-[#212121] dark:to-[#212121] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4 text-gray-900 dark:text-white">
+            Choose Your Plan
+          </h1>
+          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
+            Select the plan that best fits your needs. Upgrade or downgrade at any time.
+          </p>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {plans.map((plan) => {
+            const isBasicPlan = plan.name === "Basic";
+            const isProPlan = plan.name === "Pro";
+            
+            // Determine button text
+            let buttonText = "Get Started";
+            if (isProPlan) {
+              buttonText = isPro ? "Manage Membership" : "Subscribe Now";
+            }
+            
+            // Disable "Get Started" button if user is pro
+            const shouldDisableButton = isBasicPlan && isPro;
+
+            return (
+              <Card
+                key={plan.name}
+                className={cn(
+                  "relative flex flex-col bg-white dark:bg-[#303030] border-gray-200 dark:border-gray-700",
+                  plan.popular && "border-primary shadow-lg scale-105"
+                )}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-4">
+                  <CardTitle className="text-2xl mb-2 text-gray-900 dark:text-white">{plan.name}</CardTitle>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-4xl font-bold text-gray-900 dark:text-white">{plan.price}</span>
+                    {plan.pricePeriod && (
+                      <span className="text-muted-foreground dark:text-gray-300 text-lg">
+                        {plan.pricePeriod}
+                      </span>
+                    )}
+                  </div>
+                  <CardDescription className="mt-2 text-gray-600 dark:text-gray-300">
+                    {plan.description}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="flex-1">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-primary dark:text-white mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+
+                <CardFooter className="pt-6">
+                  <Button
+                    className="w-full"
+                    variant={plan.popular ? "default" : "outline"}
+                    size="lg"
+                    disabled={shouldDisableButton}
+                    asChild={!shouldDisableButton}
+                  >
+                    {shouldDisableButton ? (
+                      <span>{buttonText}</span>
+                    ) : (
+                      <a href='https://admin.webbstyle.com/pricing' target="_blank" rel="noopener noreferrer">
+                        {buttonText}
+                      </a>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+

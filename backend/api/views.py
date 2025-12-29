@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import get_user_model
 from django.db import connection
+from django.utils import timezone
 import os
 import requests
 
@@ -24,7 +24,7 @@ def get_users(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT id, username, email FROM users")
         rows = cursor.fetchall()
-        # Convert rows to list of dicts
+
         users_list = [
             {"id": row[0], "username": row[1], "email": row[2]} 
             for row in rows
@@ -32,6 +32,107 @@ def get_users(request):
 
     return Response({'users': users_list, 'count': len(users_list)}, status=status.HTTP_200_OK)
 
+
+def get_or_create_profile(cursor, user_id, name=None):
+    cursor.execute("SELECT id, name FROM profiles WHERE user_id = %s", [user_id])
+    profile_row = cursor.fetchone()
+    profile_id = profile_row[0] if profile_row else None
+    profile_name = profile_row[1] if profile_row else None
+
+    if name and not profile_row:
+        cursor.execute(
+            "INSERT INTO profiles (user_id, name, created_at, updated_at) VALUES (%s, %s, %s, %s)",
+            [user_id, name, timezone.now(), timezone.now()]
+        )
+        cursor.execute("SELECT id FROM profiles WHERE user_id = %s", [user_id])
+        profile_row = cursor.fetchone()
+        profile_id = profile_row[0] if profile_row else None
+        profile_name = name
+
+    return profile_id, profile_name
+
+def get_profile_photo(cursor, profile_id):
+    if not profile_id:
+        return None
+
+    cursor.execute("""
+        SELECT a.filename 
+        FROM assets a
+        INNER JOIN asset_types at ON a.asset_type_id = at.id
+        WHERE a.assetable_id = %s
+        AND a.assetable_type = %s
+        AND a.deleted_at IS NULL
+        AND at.key = %s
+        LIMIT 1
+    """, [profile_id, 'App\\Models\\Profile', 'images'])
+    photo_row = cursor.fetchone()
+    return photo_row[0] if photo_row else None
+
+@api_view(['POST'])
+def check_or_create_user(request):
+    try:
+        username = request.data.get('username')
+        email = request.data.get('email')
+        name = request.data.get('name')
+
+        if not username or not email:
+            return Response(
+                {'error': 'Username and email are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        username = str(username).strip()
+        email = str(email).strip()
+        name = str(name).strip() if name else None
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, username, email, premium_plan_id FROM users WHERE email = %s", [email])
+            row = cursor.fetchone()
+
+            if row:
+                user_id, user_username, user_email, premium_plan_id = row
+                created = False
+            else:
+                cursor.execute(
+                    "INSERT INTO users (username, email, created_at, updated_at) VALUES (%s, %s, %s, %s)",
+                    [username, email, timezone.now(), timezone.now()]
+                )
+                cursor.execute("SELECT id, username, email, premium_plan_id FROM users WHERE email = %s", [email])
+                row = cursor.fetchone()
+                user_id, user_username, user_email, premium_plan_id = row
+                created = True
+
+            profile_id, profile_name = get_or_create_profile(cursor, user_id, name)
+            profile_photo = get_profile_photo(cursor, profile_id)
+            # Check premium plan if premium_plan_id exists
+            plan_name = 'Basic'
+            is_pro = False
+            if premium_plan_id:
+                cursor.execute("SELECT key FROM premium_plans WHERE id = %s", [premium_plan_id])
+                plan_row = cursor.fetchone()
+                if plan_row:
+                    plan_key = plan_row[0]
+                    if plan_key == 'pro':
+                        plan_name = 'Pro'
+                        is_pro = True
+
+            return Response({
+                'id': user_id,
+                'username': user_username,
+                'email': user_email,
+                'name': profile_name,
+                'profile_photo': profile_photo,
+                'created': created,
+                'premium_plan_id': premium_plan_id,
+                'plan_name': plan_name,
+                'is_pro': is_pro
+            }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {'error': f'Internal server error: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['POST'])
 def chat(request):
@@ -49,17 +150,17 @@ def chat(request):
         ollama_port = os.getenv('OLLAMA_PORT')
         ollama_model = os.getenv('OLLAMA_MODEL')
         
-        # Build Ollama API URL
+
         ollama_url = f"http://{ollama_host}:{ollama_port}/api/generate"
         
-        # Prepare request to Ollama
+
         ollama_payload = {
             'model': ollama_model,
             'prompt': message,
             'stream': False
         }
         
-        # Make request to Ollama
+
         try:
             ollama_response = requests.post(
                 ollama_url,
